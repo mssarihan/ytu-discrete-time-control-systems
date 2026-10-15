@@ -1,0 +1,24 @@
+% 4-bit weighted-resistor DAC (cf. handwritten page 5)
+\begin{tikzpicture}[european resistors,font=\small]
+  \foreach \i/\r/\b/\x in {1/8R/b_1/0, 2/4R/b_2/1.5, 3/2R/b_3/3.0, 4/R/b_4/4.5} {
+    \draw (\x,2.0) to[R,l=\r,i_=] (\x,0.4);
+    \draw (\x,0.4) -- (\x,-0.2);
+    \node[circle,draw,inner sep=1pt] at (\x,-0.3) {};
+    \draw[thick] (\x,-0.3) -- (\x+0.42,-0.95) node[right,font=\scriptsize]{$\b$};
+    \draw (\x,-1.1) -- (\x,-2.3);
+    \node[circle,fill,inner sep=1pt] at (\x,-2.3) {};
+  }
+  \draw (-0.8,-2.3) node[left]{$V_{\mathrm{REF}}$} -- (4.5,-2.3);
+  \draw (0,2.0) -- (6.6,2.0);
+  % op-amp (inverting) drawn from basic shapes
+  \draw[thick,fill=white,draw=itublue] (6.6,3.0) -- (6.6,1.0) -- (8.8,2.0) -- cycle;
+  \node[font=\scriptsize] at (6.9,2.55) {$-$}; \node[font=\scriptsize] at (6.9,1.45) {$+$};
+  \draw (6.6,1.45) -- (6.1,1.45) -- (6.1,0.9) node[ground]{};
+  \draw (6.6,2.0) -- (6.6,2.0);
+  \draw (6.0,2.0) -- (6.0,3.7) to[R,l=$R_0$] (9.4,3.7) -- (9.4,2.0) -- (8.8,2.0);
+  \draw (6.0,2.0) node[circle,fill,inner sep=1pt]{};
+  \draw (9.4,2.0) node[circle,fill,inner sep=1pt]{} -- (10.0,2.0) node[circle,draw,inner sep=1pt]{} node[right]{$V_{\mathrm{out}}$};
+  \node[font=\scriptsize] at (0,-0.8) {LSB}; \node[font=\scriptsize] at (4.5,-3.0) {MSB};
+  \node[font=\scriptsize,align=left,fill=white,draw,inner sep=3pt] at (8.2,-1.2)
+    {4-bit D/A converter\\using weighted resistors};
+\end{tikzpicture}

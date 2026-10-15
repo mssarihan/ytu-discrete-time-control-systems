@@ -1,0 +1,26 @@
+% n-bit R-2R ladder DAC (cf. handwritten page 5)
+\begin{tikzpicture}[european resistors,font=\small]
+  % ladder
+  \draw (0,0) to[R,l=$R$] (2.2,0) to[R,l=$R$] (4.4,0);
+  \node at (5.2,0) {$\cdots$};
+  \draw (6.0,0) to[R,l=$R$] (8.0,0) to[R,l=$R$] (10.0,0);
+  \draw (-1.4,0) to[R,l=$2R$] (0,0) -- ++(-1.4,0);
+  \draw (-1.4,0) -- (-1.4,-0.6) node[ground]{};
+  \foreach \x/\b in {0/b_0,2.2/b_1,4.4/b_2,8.0/b_{n-2},10.0/b_{n-1}} {
+    \node[circle,fill,inner sep=1pt] at (\x,0) {};
+    \draw (\x,0) to[R,l_=$2R$] (\x,-1.7);
+    \node[circle,draw,inner sep=1pt] at (\x,-1.8) {};
+    \draw[thick] (\x,-1.8) -- (\x+0.35,-2.55) node[right,font=\scriptsize]{$\b$};
+    \draw (\x,-2.7) -- (\x,-3.4); \node[circle,fill,inner sep=1pt] at (\x,-3.4) {};
+  }
+  \draw (-0.8,-3.4) node[left]{$V_{\mathrm{REF}}$} -- (10.0,-3.4);
+  \node[font=\scriptsize] at (0,-4.0) {LSB}; \node[font=\scriptsize] at (10,-4.0) {MSB};
+  % op-amp
+  \draw (10.0,0) -- (11.4,0);
+  \draw[thick,fill=white,draw=itublue] (11.4,0.9) -- (11.4,-0.9) -- (13.4,0) -- cycle;
+  \node[font=\scriptsize] at (11.7,0.45) {$-$}; \node[font=\scriptsize] at (11.7,-0.45) {$+$};
+  \draw (11.4,-0.45) -- (11.0,-0.45) -- (11.0,-0.9) node[ground]{};
+  \draw (11.0,0) -- (11.0,1.4) to[R,l=$3R$] (14.0,1.4) -- (14.0,0) -- (13.4,0);
+  \node[circle,fill,inner sep=1pt] at (11.0,0) {}; \node[circle,fill,inner sep=1pt] at (14.0,0) {};
+  \draw (14.0,0) -- (14.5,0) node[circle,draw,inner sep=1pt]{} node[right]{$V_{\mathrm{out}}$};
+\end{tikzpicture}

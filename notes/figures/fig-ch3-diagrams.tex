@@ -1,0 +1,171 @@
+% Block diagrams of Chapter 3 (redrawn from the board sketches).
+% Needs: dtcnotes.sty (styles blk, sumj, sig, lab, dot and the sampler pic).
+
+% ---- p.26: physical digital control system ---------------------------------------
+\newcommand{\figDigitalLoop}{%
+\begin{tikzpicture}
+  \node[blk,minimum width=33mm,minimum height=11mm] (cpu) {Computer or\\ microprocessor};
+  \node[blk,right=10mm of cpu] (dac) {DAC};
+  \node[blk,right=10mm of dac] (as) {Analog\\ system};
+  \node[blk,below=13mm of dac] (adc) {ADC};
+  \draw[sig] ([xshift=-12mm]cpu.west) -- (cpu.west) node[pos=0,above right,lab]{input};
+  \draw[sig] (cpu) -- (dac);
+  \draw[sig] (dac) -- (as);
+  \coordinate (br) at ($(as.east)+(10mm,0)$);
+  \draw[sig] (as.east) -- (br) -- ++(8mm,0) node[right,lab,align=left]{Analog\\ output};
+  \fill (br) circle (1.4pt);
+  \draw[sig] (br) |- (adc.east);
+  \draw[sig] (adc.west) -| (cpu.south);
+\end{tikzpicture}}
+
+% ---- p.26: equivalent discrete-time loop -----------------------------------------
+\newcommand{\figEquivLoop}[2]{% #1 = reference label, #2 = output label
+\begin{tikzpicture}
+  \node[sumj] (s) {};
+  \node[blk,right=13mm of s] (c) {$C(z)$};
+  \node[blk,right=15mm of c] (g) {$\GZAS(z)$};
+  \draw[sig] ([xshift=-14mm]s.west) -- (s) node[pos=0,above right,lab]{#1};
+  \node[font=\scriptsize] at ($(s.west)+(-2.5mm,2.6mm)$) {$+$};
+  \node[font=\scriptsize] at ($(s.south)+(-2.6mm,-2.4mm)$) {$-$};
+  \draw[sig] (s) -- (c) node[midway,above,lab]{$E(z)$};
+  \draw[sig] (c) -- (g);
+  \coordinate (br) at ($(g.east)+(12mm,0)$);
+  \draw[sig] (g.east) -- (br) -- ++(6mm,0) node[right,lab]{#2};
+  \fill (br) circle (1.4pt);
+  \draw[sig] (br) -- ++(0,-14mm) -| (s.south);
+\end{tikzpicture}}
+
+% ---- p.26: what G_ZAS(z) contains -----------------------------------------------
+\newcommand{\figZASdef}{%
+\begin{tikzpicture}
+  \node[blk] (zoh) {ZOH};
+  \node[blk,right=10mm of zoh] (as) {Analog\\ subsys.};
+  \pic (sm) at ([xshift=9mm]as.east) {sampler};
+  \draw[sig] ([xshift=-10mm]zoh.west) -- (zoh);
+  \draw[sig] (zoh) -- (as);
+  \draw[sig] (as.east) -- (sm-in);
+  \draw[sig] (sm-out) -- ++(10mm,0);
+  \node[lab,above=1mm of zoh] {DAC};
+  \node[lab,below=4mm of sm-in,xshift=6mm] {ideal sampler (ADC)};
+\end{tikzpicture}}
+
+% ---- p.34: starred signals --------------------------------------------------------
+\newcommand{\figStarred}{%
+\begin{tikzpicture}
+  \pic (s1) at (0,0) {sampler};
+  \node[blk,right=18mm of s1-out] (g) {$G(s)$};
+  \pic (s2) at ([xshift=18mm]g.east) {sampler};
+  \draw[sig] ([xshift=-14mm]s1-in) -- (s1-in) node[pos=0.45,above,lab]{$x(t)$} node[pos=0.45,below,lab]{$X(s)$};
+  \draw[sig] (s1-out) -- (g) node[midway,above,lab]{$x^{*}(t)$} node[midway,below,lab]{$X^{*}(s)$};
+  \draw[sig] (g) -- (s2-in) node[midway,above,lab]{$y(t)$} node[midway,below,lab]{$Y(s)$};
+  \draw[sig] (s2-out) -- ++(20mm,0) node[midway,above,lab]{$y^{*}(t)$} node[midway,below,lab]{$Y^{*}(s)$};
+\end{tikzpicture}}
+
+% ---- p.36/37: cascade NOT separated by a sampler ---------------------------------
+\newcommand{\figCascadeNS}{%
+\begin{tikzpicture}
+  \pic (s1) at (1.4,0) {sampler};
+  \node[blk,minimum width=11mm] (h1) at (4.3,0) {$H_1(s)$};
+  \node[blk,minimum width=11mm] (h2) at (6.6,0) {$H_2(s)$};
+  \pic (s3) at (8.6,0) {sampler};
+  \draw[sig] (0,0) -- (s1-in) node[pos=0.5,above,lab]{$U(s)$};
+  \draw[sig] (s1-out) -- (h1) node[midway,above,lab]{$U^{*}(s)$};
+  \draw[sig] (h1) -- (h2) node[midway,above,lab]{$X(s)$};
+  \draw[sig] (h2) -- (s3-in) node[midway,above,lab]{$Y(s)$};
+  \draw[sig] (s3-out) -- ++(17mm,0) node[midway,above,lab]{$Y^{*}(s)$};
+\end{tikzpicture}}
+
+% ---- p.36/37: cascade separated by a sampler -------------------------------------
+\newcommand{\figCascadeS}{%
+\begin{tikzpicture}
+  \pic (s1) at (1.4,0) {sampler};
+  \node[blk,minimum width=11mm] (h1) at (4.3,0) {$H_1(s)$};
+  \pic (s2) at (6.1,0) {sampler};
+  \node[blk,minimum width=11mm] (h2) at (8.8,0) {$H_2(s)$};
+  \pic (s3) at (10.8,0) {sampler};
+  \draw[sig] (0,0) -- (s1-in) node[pos=0.5,above,lab]{$U(s)$};
+  \draw[sig] (s1-out) -- (h1) node[midway,above,lab]{$U^{*}(s)$};
+  \draw[sig] (h1) -- (s2-in) node[midway,above,lab]{$X(s)$};
+  \draw[sig] (s2-out) -- (h2) node[midway,above,lab]{$X^{*}(s)$};
+  \draw[sig] (h2) -- (s3-in) node[midway,above,lab]{$Y(s)$};
+  \draw[sig] (s3-out) -- ++(17mm,0) node[midway,above,lab]{$Y^{*}(s)$};
+\end{tikzpicture}}
+
+% ---- p.38: closed loop with G_ZAS expanded ---------------------------------------
+\newcommand{\figClosedLoopExpanded}{%
+\begin{tikzpicture}
+  \node[sumj] (s) {};
+  \node[blk,right=12mm of s] (c) {$C(z)$};
+  \node[blk,right=24mm of c] (zoh) {$G_{\mathrm{ZOH}}(s)$};
+  \node[blk,right=9mm of zoh] (g) {$G(s)$};
+  \pic (sm) at ([xshift=8mm]g.east) {sampler};
+  \node[draw=itublue,thick,rounded corners,fit=(zoh)(g)(sm-in)(sm-out),inner sep=7pt,
+        label={[lab,anchor=south east]north east:$\GZAS(z)$}] (box) {};
+  \draw[sig] ([xshift=-14mm]s.west) -- (s) node[pos=0,above right,lab]{$R(z)$};
+  \node[font=\scriptsize] at ($(s.west)+(-2.5mm,2.6mm)$) {$+$};
+  \node[font=\scriptsize] at ($(s.south)+(-2.6mm,-2.4mm)$) {$-$};
+  \draw[sig] (s) -- (c) node[midway,above,lab]{$E(z)$};
+  \draw[sig] (c) -- (box.west) node[midway,above,lab]{$U(z)$};
+  \draw[sig] (box.west) -- (zoh);
+  \draw[sig] (zoh) -- (g);
+  \draw[sig] (g) -- (sm-in);
+  \coordinate (br) at ($(box.east)+(10mm,0)$);
+  \draw[sig] (sm-out) -- (box.east) -- (br) -- ++(6mm,0) node[right,lab]{$Y(z)$};
+  \fill (br) circle (1.4pt);
+  \draw[sig] (br) -- ++(0,-17mm) -| (s.south);
+\end{tikzpicture}}
+
+% ---- p.39: sampled feedback with H(s) --------------------------------------------
+\newcommand{\figSampledFeedback}{%
+\begin{tikzpicture}
+  \node[sumj] (s) {};
+  \node[blk,right=14mm of s] (d) {$D(s)$};
+  \node[blk,right=14mm of d] (g) {$G(s)$};
+  \draw[sig] ([xshift=-14mm]s.west) -- (s) node[pos=0,above right,lab]{$R(s)$};
+  \node[font=\scriptsize] at ($(s.west)+(-2.5mm,2.6mm)$) {$+$};
+  \node[font=\scriptsize] at ($(s.south)+(-2.6mm,-2.4mm)$) {$-$};
+  \draw[sig] (s) -- (d) node[midway,above,lab]{$E(s)$};
+  \draw[sig] (d) -- (g);
+  \coordinate (br) at ($(g.east)+(14mm,0)$);
+  \fill (br) circle (1.4pt);
+  \draw[sig] (g) -- (br) node[midway,above,lab]{$Y(s)$};
+  \pic (so) at ([xshift=12mm]br) {sampler};
+  \draw[sig] (br) -- (so-in);
+  \draw[sig] (so-out) -- ++(14mm,0) node[midway,above,lab]{$Y^{*}(s)$};
+  % feedback path (right to left)
+  \node[blk,below=15mm of g] (h) {$H(s)$};
+  \pic[xscale=-1] (sf) at ($(h.west)+(-12mm,0)$) {sampler};
+  \draw[sig] (br) |- (h.east) node[pos=0.75,above,lab]{$Y(s)$};
+  \draw[sig] (h.west) -- (sf-in) node[midway,above,lab]{$X(s)$};
+  \draw[sig] (sf-out) -| (s.south) node[pos=0.25,above,lab]{$X^{*}(s)$};
+\end{tikzpicture}}
+
+% ---- p.40: analog disturbance in a digital loop ----------------------------------
+\newcommand{\figDisturbance}{%
+\begin{tikzpicture}
+  \node[sumj] (s) {};
+  \node[blk,minimum width=12mm,right=10mm of s] (c) {$C^{*}(s)$};
+  \pic (s1) at ([xshift=9mm]c.east) {sampler};
+  \node[blk,right=10mm of s1-out] (zoh) {$G_{\mathrm{ZOH}}(s)$};
+  \node[sumj,right=12mm of zoh] (p) {};
+  \node[blk,right=12mm of p] (g) {$G(s)$};
+  \pic (s2) at ([xshift=10mm]g.east) {sampler};
+  \node[blk,above=10mm of p,minimum width=10mm] (gd) {$G_d(s)$};
+  \draw[sig] ([xshift=-17mm]s.west) -- (s) node[pos=0,above right,lab]{$R(s)$};
+  \node[font=\scriptsize] at ($(s.west)+(-2.5mm,2.6mm)$) {$+$};
+  \node[font=\scriptsize] at ($(s.south)+(-2.6mm,-2.4mm)$) {$-$};
+  \draw[sig] (s) -- (c) node[midway,above,lab]{$E(s)$};
+  \draw[sig] (c.east) -- (s1-in) node[midway,above,lab]{$U(s)$};
+  \draw[sig] (s1-out) -- (zoh) node[midway,above,lab]{$U^{*}(s)$};
+  \draw[sig] (zoh) -- (p);
+  \draw[sig] (p) -- (g);
+  \draw[sig] ([yshift=0mm]gd.south) -- (p.north);
+  \draw[sig] ([yshift=8mm]gd.north) node[above,lab]{$D(s)$} -- (gd.north);
+  \draw[sig] (g) -- (s2-in) node[midway,above,lab]{$Y(s)$};
+  \coordinate (br) at ($(s2-out)+(10mm,0)$);
+  \draw[sig] (s2-out) -- (br) -- ++(6mm,0) node[right,lab]{$Y^{*}(s)$};
+  \fill (br) circle (1.4pt);
+  \draw[sig] (br) -- ++(0,-14mm) -| (s.south);
+  \node[font=\scriptsize] at ($(p.west)+(-2.5mm,2.5mm)$) {$+$};
+  \node[font=\scriptsize] at ($(p.north)+(-2.5mm,2.5mm)$) {$+$};
+\end{tikzpicture}}

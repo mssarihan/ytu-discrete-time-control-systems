@@ -1,0 +1,278 @@
+\section{Data Acquisition, Conversion and Distribution}\label{sec:acq}
+\lecdate{23 September 2019}
+
+\subsection{Quantizing and quantization error}\scanref{pp.\,1}
+The main function of an A/D conversion consists of three steps.
+\begin{itemize}
+  \item \textbf{Sampling:} the analog signal becomes a discrete-time signal (real numbers).
+  \item \textbf{Amplitude quantization:} each number is replaced by an approximation taken from a finite
+        set of discrete values. This causes the \emph{quantization error}.
+  \item \textbf{Coding:} the discrete values are converted to binary values.
+\end{itemize}
+
+\paragraph{Quantization level.} With $\mathrm{FSR}$ the full-scale range and $n$ the number of bits,
+\begin{equation}
+  Q=\frac{\mathrm{FSR}}{2^{n}} .
+\end{equation}
+
+\begin{example}
+For an input range of $\pm5\,\mathrm{V}$ (so $\mathrm{FSR}=10\,\mathrm{V}$) and a $12$-bit A/D converter (ADC),
+\[
+  Q=\frac{10}{2^{12}}=2.44\ \mathrm{mV}.
+\]
+This ADC cannot generate a new discrete value if the voltage change between two adjacent sample values is
+smaller than $2.44\ \mathrm{mV}$.
+\end{example}
+
+\paragraph{Quantization error.} Let $x(t)$ be the analog input and $y(t)$ the closest available digital
+value at the output of the A/D block. The error is $e(t)=x(t)-y(t)$. It varies between $0$ and $\mp\tfrac12 Q$,
+so its magnitude satisfies
+\begin{equation}
+  0\le \lvert e(t)\rvert\le \tfrac12 Q .
+\end{equation}
+
+\begin{center}
+\begin{tikzpicture}[scale=1]
+  \begin{axis}[width=0.78\linewidth,height=5.6cm,axis lines=left,xlabel={$x(t)$ (analog input)},
+      ylabel={$y(t)$ (digital value)},xmin=0,xmax=8,ymin=0,ymax=8.6,
+      xtick={0,1,...,8},ytick={0,1,...,8},
+      xticklabels={0,,,,,,,,},yticklabels={0,,,,,,,,},grid=both,
+      grid style={very thin,gridgray},every axis plot/.append style={thick}]
+    \addplot[itublue,const plot mark mid,domain=0:8,samples=17,unbounded coords=jump]
+      {round(x)};
+    \addplot[itugold,dashed,domain=0:8] {x};
+    \node[font=\small,itublue,anchor=west] at (axis cs:4.7,2.5) {$y=$ quantized};
+    \node[font=\small,itugold,anchor=west] at (axis cs:1.1,5.4) {$y=x$ (ideal)};
+    \draw[<->,boardgreen,thick] (axis cs:5.2,5.2) -- node[right,font=\scriptsize]{$Q$} (axis cs:5.2,6.2);
+  \end{axis}
+\end{tikzpicture}\\[2pt]
+{\small Staircase characteristic of a quantizer; the step is $Q$ and the error never exceeds $Q/2$.}
+\end{center}
+
+\begin{addsol}
+\textbf{Problem.} Find $Q$ for a $\pm5\,\mathrm{V}$ converter with $n=8,10,12,16$ bits, and the number of
+levels $2^n$.
+
+\medskip
+\begin{center}
+\begin{tabular}{@{}rrr@{}}\toprule
+$n$ & $2^n$ & $Q=10/2^n$ \\ \midrule
+8  & 256    & 39.06 mV \\
+10 & 1024   & 9.77 mV \\
+12 & 4096   & 2.44 mV \\
+16 & 65536  & 0.153 mV \\ \bottomrule
+\end{tabular}
+\end{center}
+The maximum error is $Q/2$, e.g.\ $1.22\,\mathrm{mV}$ for $n=12$.
+\end{addsol}
+
+%------------------------------------------------------------------------------
+\subsection{Data acquisition, conversion and distribution systems}\scanref{pp.\,2--6}
+The signal conversion in a digital control system involves the following operations:
+\begin{enumerate}
+  \item Multiplexing and demultiplexing,
+  \item Sample and hold,
+  \item A/D conversion (quantizing, encoding),
+  \item D/A conversion (decoding).
+\end{enumerate}
+
+\paragraph{Data-acquisition system.} Physical variables (position, acceleration, temperature, pressure,
+\ldots) are converted to a voltage or current by a transducer, amplified, low-pass filtered (noise
+cancellation), multiplexed, sampled-and-held and finally converted by the A/D converter before they go to
+the digital controller.
+
+\begin{center}
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[node distance=13mm,font=\small]
+  \node[blk,minimum height=9mm] (tr) {Transducer};
+  \node[blk,right=of tr] (am) {Amplifier};
+  \node[blk,right=of am,text width=17mm] (lp) {Low Pass Filter};
+  \node[blk,right=of lp] (mux) {Analog MUX};
+  \node[blk,right=of mux] (sh) {Sample Hold};
+  \draw[sig] ($(tr.west)+(-8mm,0)$) -- node[above,pos=0.2,text width=13mm,align=center,font=\scriptsize]{physical variables} (tr);
+  \draw[sig] (tr) -- node[above,font=\scriptsize,align=center]{voltage\\ or current} (am);
+  \draw[sig] (am) -- (lp);
+  \draw[sig] (lp) -- node[below,font=\scriptsize]{noise cancel.} (mux);
+  \draw[sig] (mux) -- (sh);
+  \node[blk,below=9mm of sh] (adc) {A/D Conv.};
+  \draw[sig] (sh) -- (adc);
+  \draw[sig] (adc.west) -- ++(-8mm,0) node[left,font=\scriptsize,align=center]{to digital\\control};
+  \draw[sig] ($(mux.north)+(0,5mm)$) node[above,font=\scriptsize]{Analog} -- (mux.north);
+  \node[font=\scriptsize,right=1mm of adc] {Digital};
+\end{tikzpicture}}
+\end{center}
+
+\paragraph{Data-distribution system.} The digital value from the controller is stored in a register,
+demultiplexed, converted by D/A converters and held before it reaches the actuator.
+
+\begin{center}
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[node distance=13mm,font=\small]
+  \node[blk] (rg) {Register};
+  \node[blk,right=of rg] (dm) {DeMUX};
+  \node[blk,right=of dm] (da) {D/A conv.};
+  \node[blk,right=of da] (hd) {Hold};
+  \draw[sig] ($(rg.west)+(-10mm,0)$) -- node[above,pos=0.1,font=\scriptsize,align=center]{from digital\\control} (rg);
+  \draw[sig] (rg) -- (dm);
+  \draw[sig] (dm) -- node[above,font=\scriptsize]{Digital} (da);
+  \draw[sig] (da) -- (hd);
+  \draw[sig] (hd) -- node[above,font=\scriptsize,pos=0.5]{Analog} ++(1.8,0) node[right,font=\scriptsize,align=left]{to\\actuator};
+\end{tikzpicture}}
+\end{center}
+
+%------------------------------------------------------------------------------
+\subsubsection*{Analog multiplexer (MUX)}
+\begin{itemize}
+  \item It is a multiple switch (usually an electronic switch) that sequentially switches among many analog
+        input channels.
+  \item Number of channels: $4,8,16,32,64,\dots$
+  \item At a given instant only one switch is in the ``on'' position.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=0.55cm]
+  \draw[thick] (0,-0.7) rectangle (3.6,8.6);
+  \foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\yy}{7.8-\i}
+    \draw (-1.2,\yy) -- ++(0.3,0) -- ++(0.1,0.18) -- ++(0.1,-0.36) -- ++(0.1,0.36) -- ++(0.1,-0.36) -- ++(0.1,0.18) -- (0.2,\yy);
+    \node[circle,fill,inner sep=1pt] at (0.2,\yy) {};
+    \node[circle,draw,inner sep=1pt] at (2.2,\yy) {};
+    \draw (3.6,\yy) -- (4.2,\yy);
+    \ifnum\i=0
+      \draw[thick] (0.2,\yy) -- (2.2,\yy);
+    \else
+      \draw[thick] (0.2,\yy) -- ($(0.2,\yy)+(1.7,0.45)$);
+    \fi
+  }
+  \draw[thick] (4.2,0.8) -- (4.2,7.8);
+  \draw[->] (4.2,4.3) -- (4.9,4.3) node[right,font=\small]{to S/H};
+  \node[font=\small,anchor=east] at (-1.3,4.3) {Input channels};
+  \draw[->,thick] (1.7,-1.6) -- (1.7,-0.7);
+  \node[font=\small] at (1.7,-2.1) {sequencer};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Demultiplexer}
+It separates the composite output digital data from the digital controller into the original channels. Each
+channel is connected to a D/A converter to produce the analog signal of that channel.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \node[blk,minimum width=10mm] (d1) at (0,0.7) {DAC};
+  \node[blk,minimum width=10mm] (d2) at (0,-0.1) {DAC};
+  \draw[sig] (-1.6,0.7) -- (d1); \draw[sig] (-1.6,-0.1) -- (d2);
+  \draw[thick] (-1.6,0.7) -- (-1.6,-1.1);
+  \draw[sig] (-2.2,-0.2) -- (-1.6,-0.2);
+  \draw[sig] (-1.6,-0.9) -- (-1.1,-0.9) node[right]{\vdots};
+  \draw[sig] (d1) -- ++(1.2,0) node[right]{Analog 1};
+  \draw[sig] (d2) -- ++(1.2,0) node[right]{Analog 2};
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Sample-and-hold circuit}
+A sampler converts an analog signal into a train of amplitude-modulated pulses. The hold circuit holds the
+value of the sampled pulse over a specified period of time. The S/H circuit is an analog circuit (simply a
+voltage-memory device).
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[width=0.8\linewidth,height=5.2cm,axis lines=left,xlabel={$t$},ylabel={$x$},
+      xmin=0,xmax=10.5,ymin=0,ymax=1.35,xtick=\empty,ytick=\empty,clip=false]
+    \addplot[itublue,thick,domain=0:10,samples=100,smooth]
+      {0.3+0.95*sin(deg(x*0.33))^1.2*exp(-0.04*x)};
+    \addplot[ycomb,black!70,thick,samples at={0.5,1.5,...,9.5}]
+      {0.3+0.95*sin(deg(x*0.33))^1.2*exp(-0.04*x)};
+    \addplot[const plot,itugold,thick,samples at={0.5,1.5,...,9.5}]
+      {0.3+0.95*sin(deg(x*0.33))^1.2*exp(-0.04*x)};
+  \end{axis}
+\end{tikzpicture}\\[2pt]
+{\small Blue: analog signal; vertical lines: sampled pulses; gold: held (staircase) value.}
+\end{center}
+
+%------------------------------------------------------------------------------
+\subsection{The AD585 sample-and-hold IC and types of A/D converters}
+IC AD585 (Analog Devices) is a high-speed, precision S/H circuit: a unity-gain buffer (Op-Amp~1), a switch
+operated by the sample/hold command, a hold capacitor and an output buffer (Op-Amp~2).
+
+\begin{center}
+\resizebox{\linewidth}{!}{\input{figures/fig-ad585}}
+\end{center}
+
+\paragraph{Types of A/D converters.} The following types are used most frequently: successive-\allowbreak approximation, integrating, counter and parallel (flash) type.\par
+
+\begin{center}
+\begin{tabular}{@{}clccc@{}}\toprule
+Type & Name & Speed & Resolution & Noise immunity\ \textbar\ Cost \\ \midrule
+1 & Successive approximation & medium & 10--16 bits & poor \ \textbar\ low \\
+2 & Integrating & slow & 12--18 bits & good \ \textbar\ low \\
+3 & Counter & slow & 14--24 bits & good \ \textbar\ medium \\
+4 & Parallel / flash & fast & 4--8 bits & none \ \textbar\ high \\ \bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Errors in A/D converters.} Actual converters show \emph{offset error}, \emph{linearity error} and
+\emph{gain error} with respect to the ideal characteristic (binary code against input, from $000$ up to
+$111$ at full scale FS).
+
+\begin{center}
+\resizebox{\linewidth}{!}{\input{figures/fig-adc-errors}}
+\end{center}
+
+%------------------------------------------------------------------------------
+\subsection{Types of D/A converters}\scanref{pp.\,5}
+For a full-range digital input there are $2^{n}$ corresponding different analog values, including $0$. For
+example, an $8$-bit DAC has $2^{8}=256$ values, i.e.\ the codes $0$--$255$. In D/A conversion there is a
+\emph{one-to-one correspondence} (so there is no quantization error).
+
+Two methods are used: \textbf{weighted resistors} (simple but the accuracy is low) and the \textbf{R-2R
+ladder network} (complicated but the accuracy is high).
+
+\paragraph{4-bit DAC with weighted resistors.} The inverting op-amp sums the currents of the branches
+$8R,4R,2R,R$; $b_1$ is the LSB and $b_4$ the MSB.
+\begin{equation}
+  V_{\mathrm{out}}=\frac{R_0}{R}\Bigl[b_4+\frac{b_3}{2}+\frac{b_2}{4}+\frac{b_1}{8}\Bigr]V_{\mathrm{REF}} .
+\end{equation}
+
+\begin{center}
+\resizebox{\linewidth}{!}{\input{figures/fig-dac-weighted}}
+\end{center}
+
+\begin{boardnote}
+The op-amp is an \emph{inverting} amplifier, so the output voltage actually carries a minus sign. The board
+formula gives the magnitude.
+\end{boardnote}
+
+\paragraph{$n$-bit DAC with an R-2R ladder.}
+\begin{equation}
+  V_{\mathrm{out}}=\frac{V_{\mathrm{REF}}}{2}\Bigl[b_{n-1}+\frac{1}{2}b_{n-2}+\cdots+\frac{1}{2^{\,n-1}}b_{0}\Bigr].
+\end{equation}
+
+\begin{center}
+\resizebox{\linewidth}{!}{\input{figures/fig-dac-r2r}}
+\end{center}
+
+\begin{addsol}
+\textbf{Problem.} A 4-bit weighted-resistor DAC has $R_0=R$ and $V_{\mathrm{REF}}=5\,\mathrm{V}$. Find the
+output for the code $b_4b_3b_2b_1=1011$, the output step (resolution) and the full-scale output.
+
+\medskip\noindent
+\emph{Solution.} With $R_0/R=1$,
+\[
+  \lvert V_{\mathrm{out}}\rvert=\Bigl[1+\tfrac{0}{2}+\tfrac14+\tfrac18\Bigr]\cdot 5=1.375\cdot5=6.875\ \mathrm{V}.
+\]
+The LSB is $b_1$ with weight $\tfrac18$, so one step is $5/8=0.625\ \mathrm{V}$ and the code $1011=11$ gives
+$11\cdot0.625=6.875\ \mathrm{V}$, in agreement. Full scale (code $1111$): $\tfrac{15}{8}\cdot5=9.375\ \mathrm{V}$.
+\end{addsol}
+
+%------------------------------------------------------------------------------
+\subsection{Reconstructing the input signal by hold circuits}\scanref{pp.\,6}
+\paragraph{Zero-order hold (ZOH).} The hold circuit produces a staircase waveform. Because of its simplicity
+the ZOH is commonly used in digital control systems.
+
+\paragraph{First-order hold (FOH).} It retains the value of the previous sample, as well as the present one,
+and predicts, by extrapolation, the next value.
+
+\begin{center}
+\input{figures/fig-holds}\\[2pt]
+{\small Dotted: original signal; solid: reconstructed signal.}
+\end{center}
+
+

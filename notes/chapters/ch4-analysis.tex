@@ -1,0 +1,667 @@
+\section{Steady-State Error and Stability of Digital Control Systems}\label{sec:analysis}
+\lecdate{11, 18 and 25 November 2019}
+\input{figures/fig-ch4-diagrams}
+
+%==============================================================================
+\subsection{Steady-state error and error constants}\scanref{pp.\,42--46}
+We consider the unity-feedback block diagram of Fig.~\ref{fig:ufb}.
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.7\linewidth}{!}{\figEquivLoop{$R(z)$}{$Y(z)$}}
+\caption{Unity-feedback digital control system.}\label{fig:ufb}
+\end{figure}
+
+From the diagram, $Y(z)=E(z)\,C(z)\,\GZAS(z)$ and $E(z)=R(z)-Y(z)$, hence
+\begin{equation}
+  E(z)=\frac{R(z)}{1+\GZAS(z)C(z)}=\frac{R(z)}{1+L(z)},\qquad L(z)=\GZAS(z)\,C(z)\quad\text{(loop gain).}
+\end{equation}
+By the final value theorem, the steady-state error is
+\begin{equation}\label{eq:ess-star}
+  e(\infty)=\lim_{z\to1}(1-z^{-1})E(z)=\frac{z-1}{z}\cdot\frac{R(z)}{1+L(z)}\Big|_{z\to1}
+  =\frac{(z-1)\,R(z)}{z\,\bigl(1+L(z)\bigr)}\Big|_{z=1}.\tag{$*$}
+\end{equation}
+The limit exists if all $(z-1)$ terms in the denominator cancel. This depends on the reference input
+$R(z)$ and on the loop gain $L(z)$.
+
+\paragraph{System type.} We can rewrite $L(z)$ in the form
+\begin{equation}
+  L(z)=\frac{N(z)}{(z-1)^{n}\,D(z)},
+\end{equation}
+where $N(z)$ and $D(z)$ are polynomials without unity roots $(z-1)$.
+
+\begin{definition}[Type number]
+The type number $n$ is the number of unity poles $(z-1)$ in the $z$ transfer function.
+\end{definition}
+For example, $G(z)=\dfrac{z+2}{z(z-1)}$ is a type~1 transfer function.
+
+The factor $(z-1)$, i.e.\ $z=1$, plays the same role as a pole at the origin of an $s$-domain transfer
+function in determining the steady-state error of the system. The reason is the mapping $z=\ee^{sT}$:
+$\dfrac1s\leftrightarrow\dfrac{1}{z-1}$, and $s=0$ corresponds to $z=\ee^{0}=1$.
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.78\linewidth}{!}{\figSZplanes}
+\caption{Stable regions (hatched): the left half of the $s$ plane and the interior of the unit circle in the
+$z$ plane.}
+\end{figure}
+
+\begin{boardnote}
+When $L(z)$ is substituted in $(*)$ the board writes the denominator as $z\bigl(N(z)+(z+1)^{n}D(z)\bigr)$.
+The factor is $(z-1)^{n}$, as the derivation shows, and it is typeset that way below.
+\end{boardnote}
+Substituting $L(z)$ in the expression $(*)$ gives
+\begin{equation}
+  e_{ss}=e(\infty)=\frac{(z-1)^{n+1}\,D(z)\,R(z)}{z\bigl(N(z)+(z-1)^{n}D(z)\bigr)}\Big|_{z=1}.
+\end{equation}
+
+\subsubsection*{Sampled step input}
+$\dfrac1s\to R(z)=\dfrac{z}{z-1}$, so
+\[
+  e_{ss}=\frac{(z-1)\cdot z}{z(z-1)(1+L(z))}\Big|_{z=1}=\frac{1}{1+L(1)}=\frac{1}{1+K_p}.
+\]
+$K_p=L(1)$ is the \emph{position error constant}: $K_p=\dfrac{N(z)}{(z-1)^{n}D(z)}\Big|_{z=1}=L(1)$ and
+\[
+  e(\infty)=\begin{cases}\dfrac{1}{1+L(1)},&n=0,\\[2mm] 0,&n\ge1.\end{cases}
+\]
+
+\subsubsection*{Sampled ramp input}
+$\dfrac{1}{s^{2}}\to R(z)=\dfrac{Tz^{-1}}{(1-z^{-1})^{2}}=\dfrac{Tz}{(z-1)^{2}}$, so
+\[
+  e_{ss}=\frac{(z-1)R(z)}{z(1+L(z))}\Big|_{z=1}=\frac{T}{(z-1)\bigl(1+L(z)\bigr)}\Big|_{z=1}=\frac{1}{K_v},
+\]
+with the \emph{velocity error constant}
+\[
+  K_v=\frac1T\,(z-1)L(z)\Big|_{z=1},\qquad
+  e(\infty)=\begin{cases}\infty,&n=0,\\[1mm]\dfrac{T}{(z-1)L(z)\big|_{z=1}},&n=1,\\[3mm]0,&n\ge2.\end{cases}
+\]
+
+\subsubsection*{Sampled parabolic input}
+The \emph{acceleration constant} is $K_a=\dfrac{1}{T^{2}}(z-1)^{2}L(z)\Big|_{z=1}$ and
+\[
+  e(\infty)=\begin{cases}\infty,&n\le1,\\[1mm]\dfrac{T^{2}}{(z-1)^{2}L(z)\big|_{z=1}},&n=2,\\[3mm]0,&n\ge3.\end{cases}
+\]
+\begin{remark}[added]
+The board does not write the parabolic input. The formulas above correspond to $r(t)=t^{2}/2$, for which
+$R(z)=\dfrac{T^{2}z(z+1)}{2(z-1)^{3}}$; then $e_{ss}=\dfrac{T^{2}(z+1)}{2(z-1)^{2}(1+L(z))}\Big|_{z=1}=\dfrac1{K_a}$.
+All of this assumes that the closed loop is stable; otherwise the final value theorem does not apply.
+\end{remark}
+
+\begin{table}[ht]
+\centering
+\caption{Steady-state error $e(\infty)$ of a unity-feedback digital system (summary of the formulas above).}\label{tab:ess}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{c|c|c|c}
+Type $n$ & Step & Ramp & Parabola\\\hline
+0 & $\dfrac{1}{1+K_p}$ & $\infty$ & $\infty$\\
+1 & $0$ & $\dfrac{1}{K_v}$ & $\infty$\\
+2 & $0$ & $0$ & $\dfrac{1}{K_a}$\\
+$\ge3$ & $0$ & $0$ & $0$
+\end{tabular}
+\end{table}
+
+\begin{example}[Type-1 loop, step and ramp inputs]
+Find the steady-state error $e(\infty)$ for the digital control system with unity feedback and transfer
+functions
+\[
+  \GZAS(z)=\frac{K(z+a)}{(z-1)(z-b)},\qquad C(z)=\frac{K_c(z-b)}{z-c},\qquad 0<a,b,c<1,
+\]
+(a) for a sampled unit step and (b) for a sampled unit ramp.
+
+\noindent The loop gain is
+\[
+  L(z)=C(z)\GZAS(z)=\frac{K K_c\,(z+a)}{(z-1)(z-c)},\qquad L(1)=\infty,
+\]
+so the system type is $n=1$.
+\begin{itemize}
+  \item For a sampled unit step, $e(\infty)=\dfrac{1}{1+L(1)}=0$.
+  \item For a sampled unit ramp,
+  \[
+    e(\infty)=\frac{T}{(z-1)L(z)\big|_{z=1}}=\frac{T}{\dfrac{K K_c(1+a)}{1-c}}=\frac{T(1-c)}{K K_c(1+a)}.
+  \]
+\end{itemize}
+A larger $K_c$ gives a smaller $e_{ss}$ ($K_c\uparrow\Rightarrow e_{ss}\downarrow$). The controller poles and zeros
+affect the steady-state error.
+\end{example}
+
+\begin{example}[First-order plant with a proportional controller]\label{ex:ess-first}
+Find the steady-state error $e(\infty)$ for the analog system $G(s)=\dfrac{K}{s+a}$ with a proportional
+digital controller $K_c$ and a sampled unit-step input. The ZOH, $G(s)$ and the sampler form the block
+$\GZAS(z)=(1-z^{-1})\ZT{G(s)/s}$ of the loop of Fig.~\ref{fig:ufb}, with $C(z)=K_c$ and
+$L(z)=K_c\GZAS(z)$.
+\[
+  G(s)=\frac{K}{s+a}\ \longrightarrow\ \GZAS(z)=\frac{z-1}{z}\,\ZT{\frac{K}{s(s+a)}}
+  =\frac Ka\cdot\frac{1-\ee^{-aT}}{z-\ee^{-aT}},
+\]
+\[
+  L(z)=\frac{K K_c}{a}\cdot\frac{1-\ee^{-aT}}{z-\ee^{-aT}}.
+\]
+Then $L(1)=\dfrac{K K_c}{a}$ and
+\[
+  e(\infty)=\frac{1}{1+L(1)}=\frac{1}{1+K K_c/a}=\frac{a}{a+K K_c}.
+\]
+\end{example}
+
+\begin{boardnote}
+The last line of this example on the board reads $e(\infty)=\dfrac{1}{1+L(1)}=\dfrac{K_cK}{a}$, followed by
+``$K_c\downarrow\ e_{ss}\downarrow$''. The quantity $K_cK/a$ is $L(1)$, not the error. The correct result is the
+one above, and the error \emph{decreases} when $K_c$ \emph{increases} (as already stated in the previous
+example).
+\end{boardnote}
+
+\addedsection[Added problems: steady-state error]
+\begin{problem}[Error constants of a type-1 loop]
+A unity-feedback loop with $T=0.1\,\mathrm{s}$ has $L(z)=\dfrac{0.2\,(z+0.8)}{(z-1)(z-0.6)}$. Find the type,
+$K_p$, $K_v$ and the steady-state error to a unit step and to a unit ramp.
+\end{problem}
+\begin{solution}
+There is one pole at $z=1$, so $n=1$ and $K_p=L(1)=\infty$. The step error is $0$. The velocity constant is
+\[
+  K_v=\frac1T(z-1)L(z)\Big|_{z=1}=\frac{1}{0.1}\cdot\frac{0.2\cdot1.8}{1-0.6}=9,\qquad e_{ramp}(\infty)=\frac{1}{K_v}=0.111.
+\]
+The closed-loop poles are $0.7\pm0.52\,\jj$ ($|z|=0.87$), so the loop is stable, and a simulation of the
+closed loop to the sampled ramp $r(k)=kT$ settles to the error $0.111$.
+\end{solution}
+
+\begin{problem}[Example~\ref{ex:ess-first} with numbers]
+Take $K=2$, $a=1$, $K_c=4$ and $T=0.2\,\mathrm{s}$. Find $e(\infty)$ for a unit step and check stability.
+\end{problem}
+\begin{solution}
+$L(1)=KK_c/a=8$, so $e(\infty)=1/(1+8)=0.111$. The closed-loop pole is
+$z=\ee^{-aT}-\dfrac{KK_c}{a}\bigl(1-\ee^{-aT}\bigr)=0.8187-8\cdot0.1813=-0.631$, inside the unit circle,
+so the loop is stable and the final value theorem applies. A time simulation gives $y(\infty)=0.8889$, i.e.\ an
+error of $0.111$.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Stability of digital control systems}\scanref{pp.\,46--48}
+Stability is a basic requirement for analog and digital control systems. A digital control system is based on
+samples and is updated every sampling period, and there is a possibility that the system may become unstable
+between updates. This obviously makes stability analysis different in the digital case.
+
+\subsubsection*{Definitions of stability}
+\begin{definition}[Asymptotic stability]
+A system is said to be asymptotically stable if its response to any initial conditions decays to zero
+asymptotically in steady state, that is, the response due to the initial conditions satisfies
+\[
+  \lim_{k\to\infty}y(k)=0.
+\]
+\end{definition}
+\begin{definition}[Marginal stability]
+If the response remains bounded but does not decay to zero, the system is said to be marginally stable.
+\end{definition}
+\begin{definition}[BIBO stability]
+A system is said to be BIBO (bounded-input bounded-output) stable if its response to any bounded input
+remains bounded:
+\[
+  |u(k)|<b_u,\ \ 0<b_u<\infty\quad(\text{input}),
+\]
+\[
+  \Longrightarrow\ |y(k)|<b_y,\ \ 0<b_y<\infty\quad(\text{output}),\qquad k=0,1,2,\dots
+\]
+\end{definition}
+\begin{figure}[ht]
+\centering
+\figBiboSeq
+\caption{A bounded output sequence: $|y(k)|<b_y$ for all $k$.}
+\end{figure}
+
+\subsubsection*{Stable $z$-domain pole locations}
+Consider the sampled exponential and its $z$ transform,
+\[
+  p^{k}=\ee^{-akT},\quad k=0,1,2,\dots\ \longrightarrow\ \frac{z}{z-p},\qquad p\ \text{real or complex.}
+\]
+Then the time sequence for large $k$ is given by
+\[
+  |p|^{k}\ \to\ \begin{cases}0,&|p|<1,\\1,&|p|=1,\\\infty,&|p|>1.\end{cases}
+\]
+Any time sequence can be described by
+\[
+  f(k)=\sum_{i=1}^{n}A_i\,p_i^{k},\quad k=0,1,2,\dots\ \longrightarrow\ F(z)=\sum_{i=1}^{n}A_i\,\frac{z}{z-p_i},
+\]
+where $A_i$ are the partial-fraction coefficients and $p_i$ the $z$-domain poles. Hence we conclude that the
+sequence is bounded if its poles lie on or inside the unit circle, and decays exponentially if its poles
+lie \emph{inside} the unit circle (it grows exponentially if they lie outside).
+Note that the case of repeated poles on the unit circle corresponds to an unbounded time sequence.
+
+\begin{boardnote}
+The board sentence ends ``\dots and decay exponentially if its poles lie outside the unit circle''; ``outside''
+must be ``inside'' (the sequence \emph{grows} for poles outside). In the ramp example below the board
+labels the sequence ``unbounded (expo.)'', but $y(k)=kT$ grows linearly, not exponentially.
+\end{boardnote}
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}{0.4\linewidth}\centering\resizebox{\linewidth}{!}{\figPoleCircle}\end{minipage}\hfill
+\begin{minipage}{0.55\linewidth}\centering
+For example, the ramp function $\dfrac{1}{s^{2}}$ (two poles at the origin of the $s$ plane)
+$\ \to\ \dfrac{Tz}{(z-1)^{2}}$ (two poles at $z=1$) $\ \to\ y(k)=kT$:\\[2mm]
+\figRampSeq
+\end{minipage}
+\caption{Poles on or inside the unit circle give bounded sequences, except repeated poles on the circle.}
+\end{figure}
+
+%------------------------------------------------------------------------------
+\subsection{Asymptotic stability and pole--zero cancellation}\scanref{p.\,49}
+\begin{theorem}[Asymptotic stability]
+In the absence of pole--zero cancellation, an LTI digital system is asymptotically stable if its poles are
+inside the unit circle, and marginally stable if its poles are on the unit circle with no repeated poles on
+the unit circle.
+\end{theorem}
+
+\paragraph{Pole--zero cancellation.}
+\begin{itemize}
+  \item Invisible but stable poles would not lead us to a wrong conclusion.
+  \item Invisible but unstable poles would.
+\end{itemize}
+
+\begin{example}
+Determine the asymptotic stability of the following systems.
+\begin{center}
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}l c c l@{}}
+ & $H(z)$ & poles & conclusion\\\hline
+a) & $\dfrac{4(z-2)}{(z-2)(z-0.1)}$ & $2,\ 0.1$ & unstable\\
+b) & $\dfrac{4(z-0.2)}{(z-0.2)(z-0.1)}$ & $0.2,\ 0.1$ & asymptotically stable\\
+c) & $\dfrac{5(z-0.1)}{(z-0.2)(z-0.1)}$ & $0.1,\ 0.2$ & asymptotically stable\\
+d) & $\dfrac{8(z-0.2)}{(z-0.1)(z-1)}$ & $0.1,\ 1$ & marginally stable\\
+e) & $\dfrac{8(z-0.2)}{(z-0.1)(z-1)^{2}}$ & $0.1,\ 1,\ 1$ (repeated) & unstable
+\end{tabular}
+\end{center}
+In (a) the cancelled pole $z=2$ is unstable although invisible in the reduced transfer function; in (b) and
+(c) the cancelled pole is stable.
+\end{example}
+
+\begin{boardnote}
+In part e) the board lists the poles as $0.2,\ 1,\ 1$. The value $0.2$ is the zero of $H(z)$; the third pole
+is $0.1$, as in the table.
+\end{boardnote}
+
+%------------------------------------------------------------------------------
+\subsection{BIBO stability}\scanref{pp.\,50--51}
+\begin{theorem}
+A discrete-time linear system is BIBO stable if and only if (iff) its impulse response sequence is
+absolutely summable, that is,
+\[
+  \sum_{i=0}^{\infty}|h(i)|<\infty.
+\]
+\end{theorem}
+A discrete-time linear system is BIBO stable if and only if the poles of its transfer function lie inside
+the unit circle.
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.4\linewidth}{!}{\figBiboRegions}
+\caption{BIBO stable (inside) and BIBO unstable (outside) pole regions.}
+\end{figure}
+
+There is no expression for the pole--zero cancellation here: BIBO stability is judged on the transfer
+function as it stands, i.e.\ after any cancellation (a cancelled mode cannot be seen from the input and
+the output).
+
+\begin{example}
+Determine the BIBO stability of the systems of the previous example.
+\begin{center}
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}l c c l@{}}
+ & $H(z)$ & poles & conclusion\\\hline
+a) & $\dfrac{4(z-2)}{(z-2)(z-0.1)}\to\dfrac{4}{z-0.1}$ & $0.1$ & BIBO stable\\
+b) & $\dfrac{4(z-0.2)}{(z-0.2)(z-0.1)}$ & $0.2,\ 0.1$ & BIBO stable\\
+c) & $\dfrac{5(z-0.1)}{(z-0.2)(z-0.1)}$ & $0.1,\ 0.2$ & BIBO stable\\
+d) & $\dfrac{8(z-0.2)}{(z-0.1)(z-1)}$ & $z=1,\ 0.1$ & BIBO unstable\\
+e) & $\dfrac{8(z-0.2)}{(z-0.1)(z-1)^{2}}$ & $z_1=1,\ z_2=1,\ z_3=0.1$ & BIBO unstable
+\end{tabular}
+\end{center}
+\end{example}
+
+\paragraph{Summary.}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}ll@{}}
+\multicolumn{2}{@{}l}{Without unstable pole--zero cancellation:}\\
+asymptotically stable & $\equiv$ BIBO stable $\equiv$ stable\\
+marginally stable & $\equiv$ BIBO unstable\\
+unstable & $\equiv$ BIBO unstable
+\end{tabular}
+\end{center}
+
+\begin{example}[Stability from a difference equation]
+Determine the stability of the following system, where all initial conditions are zero:
+\[
+  y(k+2)+0.8\,y(k+1)+0.07\,y(k)=2u(k+1)+0.2\,u(k),\qquad k=0,1,2,\dots
+\]
+Taking the $z$ transform,
+\[
+  z^{2}Y(z)+0.8z\,Y(z)+0.07\,Y(z)=2z\,U(z)+0.2\,U(z)\ \Rightarrow\ Y(z)\bigl[z^{2}+0.8z+0.07\bigr]=U(z)\bigl[2z+0.2\bigr],
+\]
+\[
+  \frac{Y(z)}{U(z)}=\frac{2(z+0.1)}{(z+0.7)(z+0.1)}=\frac{2(z+0.1)}{(z+0.7)(z+0.1)}\ \to\ z=-0.7
+\]
+(the pole at $-0.1$ is cancelled by the zero; it is stable anyway). The pole $z=-0.7$ is inside the unit circle:
+the system is asymptotically stable, BIBO stable, i.e.\ stable.
+\end{example}
+
+\addedsection[Added problems: classifying stability]
+\begin{problem}
+Classify each system as asymptotically stable, marginally stable or unstable, and say whether it is BIBO stable:
+(a) $H(z)=\dfrac{z-1.5}{(z-1.5)(z+0.3)}$; (b) $H(z)=\dfrac{1}{z^{2}+1}$; (c) $H(z)=\dfrac{1}{(z^{2}+1)^{2}}$.
+\end{problem}
+\begin{solution}
+(a) After cancellation the pole is $-0.3$, so $H$ is BIBO stable; but the cancelled pole $z=1.5$ is unstable
+and invisible, so the internal dynamics are unstable (the system is \emph{not} asymptotically stable). This
+is the case of an \emph{unstable} pole--zero cancellation.\par
+(b) The poles $\pm\jj$ are simple and on the unit circle: marginally stable, BIBO unstable (the bounded input
+$\sin(\pi k/2)$ excites the resonance and the output grows).\par
+(c) Repeated poles $\pm\jj$ on the unit circle: unstable (the response grows like $k$) and BIBO unstable.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Stability determination: MATLAB and the Routh--Hurwitz criterion}\scanref{pp.\,52--56}
+There are different methods for determining stability: MATLAB, the Routh--Hurwitz criterion and the Jury test.
+
+\paragraph{\textcircled{1} MATLAB.}
+\begin{itemize}
+  \item \texttt{roots}: returns the roots of a polynomial.
+  \item \texttt{pole}: returns the poles of a SISO or MIMO system.
+  \item \texttt{pzmap}: returns the pole--zero map of a dynamic system.
+\end{itemize}
+
+\paragraph{\textcircled{2} Routh--Hurwitz criterion.}
+\begin{itemize}
+  \item It determines conditions for the stability of LTI systems.
+  \item It cannot be used to investigate the stability of a discrete-time system directly.
+  \item The bilinear transformation is needed to use the Routh--Hurwitz criterion for the stability analysis of
+        discrete-time systems:
+        \begin{equation}\label{eq:bilinear}
+          z=\frac{1+w}{1-w}\quad\longleftrightarrow\quad w=\frac{z-1}{z+1}.
+        \end{equation}
+        It transforms the inside of the unit circle to the $w$-domain left half plane (LHP).
+\end{itemize}
+
+\subsubsection*{Verification of the bilinear transformation}
+Since $w=\dfrac{z-1}{z+1}$, the angle of $w$ is $\angle w=\angle(z-1)-\angle(z+1)$.
+\begin{figure}[ht]
+\centering
+\resizebox{0.98\linewidth}{!}{\figBilinear}
+\caption{Geometric check of $w=(z-1)/(z+1)$ for a point inside ($z_1$), on ($z_2$) and outside ($z_3$) the unit
+circle.}\label{fig:bilinear}
+\end{figure}
+\begin{align*}
+  \angle w_1&=\angle(z_1-1)-\angle(z_1+1)\ \to\ |\angle w_1|>90^{\circ}\quad(w_1\ \text{in the LHP}),\\
+  \angle w_2&=\angle(z_2-1)-\angle(z_2+1)\ \to\ \angle w_2=\pm90^{\circ}\quad(w_2\ \text{on the imaginary axis}),\\
+  \angle w_3&=\angle(z_3-1)-\angle(z_3+1)\ \to\ |\angle w_3|<90^{\circ}\quad(w_3\ \text{in the RHP}).
+\end{align*}
+For the point $z_2$ on the circle the two segments to $\pm1$ are perpendicular (a diameter subtends a right
+angle), which gives $\angle w_2=\pm90^{\circ}$.
+
+\begin{boardnote}
+For $z_2$ the board writes $\angle w_2>\pm90^{\circ}$. For a point on the circle the angle is \emph{equal} to
+$\pm90^{\circ}$, as typeset above. (For $z_1$ and $z_3$ the board's $\angle w_1>90^{\circ}$ and
+$\angle w_3<90^{\circ}$ are kept; they refer to the magnitude of the angle.)
+\end{boardnote}
+
+For the general $z$-polynomial
+\[
+  F(z)=a_nz^{n}+a_{n-1}z^{n-1}+\cdots+a_0\ \xrightarrow{\ z=\frac{1+w}{1-w}\ }\
+  a_n\Bigl(\frac{1+w}{1-w}\Bigr)^{n}+a_{n-1}\Bigl(\frac{1+w}{1-w}\Bigr)^{n-1}+\cdots+a_0.
+\]
+\begin{itemize}
+  \item For low-order polynomials it easily gives stability conditions.
+  \item For high-order polynomials a symbolic manipulation package can be used, such as the MATLAB Symbolic
+        Toolbox, Mathematica, Maxima (open source), etc.
+\end{itemize}
+
+\begin{example}[Second-order polynomial]
+Test the stability of the polynomial $F(z)=z^{2}-0.25=0$ by using the Routh--Hurwitz criterion. With the
+bilinear transformation $z=\dfrac{1+w}{1-w}$,
+\[
+  \Bigl(\frac{1+w}{1-w}\Bigr)^{2}-0.25=0\ \to\ 0.75\,w^{2}+2.5\,w+0.75=0.
+\]
+Routh table:
+\[
+\begin{array}{c|cc}
+w^{2}&0.75&0.75\\
+w^{1}&2.5&0\\
+w^{0}&0.75&
+\end{array}
+\]
+There is no sign change in the first column, so the system is stable (the roots of $F$ are $\pm0.5$).
+\end{example}
+
+\begin{example}[Third-order polynomial]
+Test the stability of the polynomial $F(z)=z^{3}+1.25z^{2}-1.375z+0.25=0$ by using the Routh--Hurwitz criterion
+(see the board note below for this polynomial). The bilinear transformation $z=\dfrac{1+w}{1-w}$ gives
+\[
+  -1.875\,w^{3}+3.875\,w^{2}+4.875\,w+1.125=0.
+\]
+Routh table:
+\[
+\begin{array}{c|cc}
+w^{3}&-1.875&4.875\\
+w^{2}&3.875&1.125\\
+w^{1}&5.419&0\\
+w^{0}&1.125&
+\end{array}
+\]
+There is one sign change in the first column, so the system is unstable. It means that one root is in the
+$w$-domain RHP. This implies that there will be one root of the characteristic equation outside the unit
+circle in the $z$ plane (indeed $F(z)=(z+2)(z-\tfrac12)(z-\tfrac14)$ has the root $z=-2$).
+\end{example}
+
+\begin{boardnote}
+The polynomial printed on the board is $F(z)=z^{3}-1.2z^{2}-1.375z-0.25$, but the $w$-polynomial and the Routh
+table written below it belong to $F(z)=z^{3}+1.25z^{2}-1.375z+0.25=(z+2)(z-\tfrac12)(z-\tfrac14)$. The
+example above is typeset with the polynomial that matches the board's calculation. For the printed
+polynomial the bilinear transformation gives $1.075\,w^{3}+4.825\,w^{2}+3.925\,w-1.825=0$, whose Routh column
+$1.075,\ 4.825,\ 4.332,\ -1.825$ also has one sign change (one root outside the circle, at $z=1.965$), so the
+conclusion on the board is the same.
+\end{boardnote}
+
+\subsubsection*{Generalization for low-order polynomials}
+\paragraph{First-order polynomial.} Consider $a_1z+a_0$ with $a_1>0$. The root is $z=-\dfrac{a_0}{a_1}$ and the
+stability condition is $\left|\dfrac{a_0}{a_1}\right|<1$.
+
+\paragraph{Second-order polynomial.} Consider $a_2z^{2}+a_1z+a_0$ with $a_2>0$. The bilinear transformation
+$z=\dfrac{1+w}{1-w}$ gives
+\[
+  a_2\Bigl(\frac{1+w}{1-w}\Bigr)^{2}+a_1\Bigl(\frac{1+w}{1-w}\Bigr)+a_0
+  =(a_2-a_1+a_0)\,w^{2}+2(a_2-a_0)\,w+(a_2+a_1+a_0).
+\]
+By the Routh--Hurwitz criterion, it can be shown that the poles of the second-order $w$-polynomial remain in
+the LHP if and only if its coefficients are all positive. The stability condition is given by
+\begin{enumerate}
+  \item $a_2-a_1+a_0>0$,
+  \item $a_2-a_0>0$,
+  \item $a_2+a_1+a_0>0$.
+\end{enumerate}
+
+\begin{example}[Second-order loop]
+Use the Routh--Hurwitz criterion to investigate the stability of the system
+$G(z)=\dfrac{5(z-1)}{(z-0.1)(z-0.8)}=\dfrac{5(z-1)}{z^{2}-0.9z+0.08}$. Here $a_2z^{2}+a_1z+a_0=z^{2}-0.9z+0.08$ with $a_2=1>0$:
+\begin{enumerate}
+  \item $a_2-a_1+a_0=1+0.9+0.08=1.98>0$,
+  \item $a_2-a_0=1-0.08=0.92>0$,
+  \item $a_2+a_1+a_0=1-0.9+0.08=0.18>0$.
+\end{enumerate}
+All conditions are met, so the system is stable.
+\end{example}
+
+\begin{example}[Stable range of a proportional gain]
+Use the Routh--Hurwitz criterion to find the stable range of the proportional controller $K$ for the
+closed-loop unity-feedback system with loop gain
+\[
+  L(z)=K\,G(z)=\frac{K(z-1)}{(z-0.1)(z-0.8)}.
+\]
+The closed-loop transfer function is $G_{cl}=\dfrac{L(z)}{1+L(z)}$ and the characteristic equation is $1+L(z)=0$:
+\[
+  1+\frac{K(z-1)}{(z-0.1)(z-0.8)}=0\ \to\ (z-0.1)(z-0.8)+K(z-1)=0\ \to\ z^{2}+(K-0.9)\,z+0.08-K=0.
+\]
+We have $a_2=1>0$ \checkmark. For a second-order system the Routh--Hurwitz stability conditions give
+\begin{align*}
+  1.\ \ a_2-a_1+a_0>0&:\ 1-(K-0.9)+0.08-K>0\ \to\ K<0.99,\\
+  2.\ \ a_2-a_0>0&:\ 1-(0.08-K)>0\ \to\ K>-0.92,\\
+  3.\ \ a_2+a_1+a_0>0&:\ 1+(K-0.9)+0.08-K>0\ \to\ 0.18>0\ \checkmark
+\end{align*}
+Hence the closed loop is stable for $-0.92<K<0.99$.
+\end{example}
+
+\addedsection[Added problems: Routh--Hurwitz with the bilinear transformation]
+\begin{problem}
+Apply the second-order conditions to $F(z)=z^{2}-1.2z+0.5$ and verify with the roots.
+\end{problem}
+\begin{solution}
+$a_2-a_1+a_0=1+1.2+0.5=2.7>0$; $a_2-a_0=0.5>0$; $a_2+a_1+a_0=1-1.2+0.5=0.3>0$: stable. The roots are
+$0.6\pm0.374\,\jj$ with $|z|=\sqrt{0.5}=0.707<1$.
+\end{solution}
+
+\begin{problem}[Stable range of a gain]
+For $L(z)=\dfrac{K(z+0.5)}{(z-1)(z-0.5)}$ find the range of $K$ for which the unity-feedback loop is stable.
+\end{problem}
+\begin{solution}
+$1+L=0\Rightarrow(z-1)(z-0.5)+K(z+0.5)=z^{2}+(K-1.5)z+(0.5+0.5K)=0$. The conditions give
+$a_2-a_1+a_0=3-0.5K>0\Rightarrow K<6$; $a_2-a_0=0.5-0.5K>0\Rightarrow K<1$;
+$a_2+a_1+a_0=1.5K>0\Rightarrow K>0$. Hence $0<K<1$. At $K=1$ the polynomial is $z^{2}-0.5z+1$, whose roots
+have $|z|=1$ (the stability limit); for $K=1.01$ they have $|z|=1.0025$.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Jury test}\scanref{pp.\,57--60}
+It is possible to investigate the stability of a $z$-domain polynomial directly using the Jury test. For the
+polynomial
+\[
+  F(z)=a_nz^{n}+a_{n-1}z^{n-1}+\cdots+a_1z+a_0,\qquad a_n>0,
+\]
+the Jury table is
+
+\begin{center}
+\tabJury
+\end{center}
+
+The roots of the polynomial are inside the unit circle if and only if
+\begin{enumerate}
+  \item $F(1)>0$,
+  \item $(-1)^{n}F(-1)>0$,
+  \item $|a_0|<a_n$,
+  \item $|b_0|>|b_{n-1}|$,
+  \item $|c_0|>|c_{n-2}|$,
+  \item[\vdots]
+  \item[$(n{+}1)$.] $|r_0|>|r_2|$,
+\end{enumerate}
+where the terms in the $(n+1)$ conditions are calculated from the Jury table. The entries of the table are
+calculated as follows:
+\[
+  b_k=\begin{vmatrix}a_0&a_{n-k}\\a_n&a_k\end{vmatrix},\ k=0,1,\dots,n-1;\qquad
+  c_k=\begin{vmatrix}b_0&b_{n-1-k}\\b_{n-1}&b_k\end{vmatrix},\ k=0,1,\dots,n-2;
+\]
+\[
+  r_0=\begin{vmatrix}s_0&s_3\\s_3&s_0\end{vmatrix},\qquad
+  r_1=\begin{vmatrix}s_0&s_2\\s_3&s_1\end{vmatrix},\qquad
+  r_2=\begin{vmatrix}s_0&s_1\\s_3&s_2\end{vmatrix}.
+\]
+
+\paragraph{Example: the entries for $n=5$.}
+\[
+  b_0=\begin{vmatrix}a_0&a_5\\a_5&a_0\end{vmatrix},\
+  b_1=\begin{vmatrix}a_0&a_4\\a_5&a_1\end{vmatrix},\
+  b_2=\begin{vmatrix}a_0&a_3\\a_5&a_2\end{vmatrix},\
+  b_3=\begin{vmatrix}a_0&a_2\\a_5&a_3\end{vmatrix},\
+  b_4=\begin{vmatrix}a_0&a_1\\a_5&a_4\end{vmatrix},
+\]
+\[
+  c_0=\begin{vmatrix}b_0&b_4\\b_4&b_0\end{vmatrix},\
+  c_1=\begin{vmatrix}b_0&b_3\\b_4&b_1\end{vmatrix},\
+  c_2=\begin{vmatrix}b_0&b_2\\b_4&b_2\end{vmatrix},\
+  c_3=\begin{vmatrix}b_0&b_1\\b_4&b_3\end{vmatrix},
+\]
+\[
+  d_0=\begin{vmatrix}c_0&c_3\\c_3&c_0\end{vmatrix},\
+  d_1=\begin{vmatrix}c_0&c_2\\c_3&c_1\end{vmatrix},\
+  d_2=\begin{vmatrix}c_0&c_1\\c_3&c_2\end{vmatrix}.
+\]
+
+\begin{example}[Fifth-order polynomial]
+Test the stability of the polynomial
+\[
+  F(z)=z^{5}+2.6z^{4}-0.56z^{3}-2.05z^{2}+0.0775z+0.35=0,\qquad n=5\ \to\ 2n-3=7\ \text{rows.}
+\]
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{c|cccccc}
+Row & $z^{0}$ & $z^{1}$ & $z^{2}$ & $z^{3}$ & $z^{4}$ & $z^{5}$\\\hline
+1 & $a_0=0.35$ & $a_1=0.0775$ & $a_2=-2.05$ & $a_3=-0.56$ & $a_4=2.6$ & $a_5=1$\\
+2 & $a_5=1$ & $a_4=2.6$ & $a_3=-0.56$ & $a_2=-2.05$ & $a_1=0.0775$ & $a_0=0.35$\\
+3 & $b_0=-0.8775$ & $b_1=-2.5729$ & $b_2=-0.1575$ & $b_3=1.854$ & $b_4=0.8325$ & \\
+4 & $b_4=0.8325$ & $b_3=1.854$ & $b_2=-0.1575$ & $b_1=-2.5729$ & $b_0=-0.8775$ & \\
+5 & $c_0=0.0770$ & $c_1=0.7143$ & $c_2=0.2693$ & $c_3=0.5151$ & & \\
+6 & $c_3=0.5151$ & $c_2=0.2693$ & $c_1=0.7143$ & $c_0=0.0770$ & & \\
+7 & $d_0=-0.2593$ & $d_1=-0.0837$ & $d_2=-0.3472$ & & &
+\end{tabular}
+\end{center}
+For instance $b_0=\begin{vmatrix}a_0&a_5\\a_5&a_0\end{vmatrix}=0.35^{2}-1=-0.8775$. Stability conditions:
+\begin{enumerate}
+  \item $F(1)=1.4175>0$ \checkmark
+  \item $(-1)^{5}F(-1)=(-1)\cdot0.3825<0$ \quad\textbf{\textcolor{boardred}{violated}}
+  \item $|a_0|<a_5$: $0.35<1$ \checkmark
+  \item $|b_0|>|b_4|$: $0.8775>0.8325$ \checkmark
+  \item $|c_0|>|c_3|$: $0.0770>0.5151$ \quad\textbf{\textcolor{boardred}{violated}}
+  \item $|d_0|>|d_2|$: $0.2593<0.3472$ \quad\textbf{\textcolor{boardred}{violated}}
+\end{enumerate}
+A single violation of one of the conditions is enough for the system \emph{not} to be stable. The
+polynomial is therefore unstable (its roots are $-2.5,\,-0.8,\,0.7,\,0.5,\,-0.5$; $|z|=2.5$ lies outside the
+unit circle).
+\end{example}
+
+\begin{boardnote}
+At the end of this example the board says ``(2 or 6)'' for the violated conditions and does not mark condition
+5, but in the board's own numbers condition 5 ($0.0770>0.5151$) is also false (it is written without a
+mark). Conditions 2, 5 and 6 are violated. Since the polynomial is unstable, the conclusion is unchanged.
+\end{boardnote}
+
+\begin{example}[Stable range of the gain, vehicle position]
+Find the stable range of the proportional controller gain $K$ for the vehicle position control system with
+the analog plant
+\[
+  G(s)=\frac{10}{s(s+10)}\quad\text{and DAC and ADC, if } T=0.05\,\mathrm{s}.
+\]
+\[
+  \GZAS(z)=(1-z^{-1})\ZT{\frac{G(s)}{s}}=(1-z^{-1})\,\mathcal{Z}\!\left[0.1\Bigl(\frac{10}{s^{2}}-\frac1s+\frac{1}{s+10}\Bigr)\right]
+\]
+\[
+  \Rightarrow\ \GZAS(z)=\frac{1.0653\times10^{-2}\,(z+0.8467)}{(z-1)(z-0.6065)}.
+\]
+The closed-loop transfer function is $G_{cl}(z)=\dfrac{K\GZAS(z)}{1+K\GZAS(z)}$ with characteristic equation
+$1+K\GZAS(z)=0$:
+\[
+  (z-1)(z-0.6065)+1.0653\times10^{-2}K(z+0.8467)=0
+\]
+\[
+  z^{2}+\bigl(1.0653\times10^{-2}K-1.6065\bigr)z+0.6065+9.02\times10^{-3}K=0.
+\]
+Jury conditions ($n=2$):
+\begin{enumerate}
+  \item $F(1)>0$: $1+(1.0653\times10^{-2}K-1.6065)+0.6065+9.02\times10^{-3}K>0\ \Rightarrow\ K>0$.
+  \item $(-1)^{2}F(-1)>0$: $1-(1.0653\times10^{-2}K-1.6065)+0.6065+9.02\times10^{-3}K>0\ \Rightarrow\ K<1967.582$.
+  \item $|a_0|<a_2$: $|0.6065+9.02\times10^{-3}K|<1\ \Rightarrow\ -178.104<K<43.6199$.
+\end{enumerate}
+Stability range for $K$: $0<K<43.6199$.
+\end{example}
+
+\begin{boardnote}
+In condition 3 the board writes $|0.6065+0.0902K|<1$; the coefficient is $9.02\times10^{-3}=0.00902$, as in the
+characteristic equation above. The bounds $-178.104<K<43.6199$ on the board are the ones obtained with $0.00902$.
+\end{boardnote}
+
+\addedsection[Added problem: Jury test, third order]
+\begin{problem}
+Use the Jury test on $F(z)=z^{3}-0.9z^{2}-0.22z+0.24$ and on $F(z)=z^{3}-1.2z^{2}-0.19z+0.33$.
+\end{problem}
+\begin{solution}
+For $n=3$ the table has three rows and the conditions are $F(1)>0$, $(-1)^{3}F(-1)>0$, $|a_0|<a_3$ and
+$|b_0|>|b_2|$, with $b_0=a_0^{2}-a_3^{2}$ and $b_2=a_0a_2-a_3a_1$.\par
+\emph{First polynomial} ($a_0=0.24$, $a_1=-0.22$, $a_2=-0.9$, $a_3=1$): $F(1)=0.12>0$;
+$-F(-1)=1.44>0$; $0.24<1$; $b_0=-0.9424$, $b_2=0.004$, so $0.9424>0.004$. All hold, the polynomial is stable
+(its roots are $0.8,\,-0.5,\,0.6$).\par
+\emph{Second polynomial} ($a_0=0.33$, $a_1=-0.19$, $a_2=-1.2$, $a_3=1$): $F(1)=-0.06<0$, so it is not stable
+(one root is $z=1.1$; the others are $-0.5$ and $0.6$).
+\end{solution}

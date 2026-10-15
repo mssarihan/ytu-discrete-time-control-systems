@@ -1,0 +1,106 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dtcnotes}[2026/10/13 helpers for the discrete-time control lecture notes]
+% Load AFTER the document class (ituphd). Adds: TikZ/pgfplots/circuitikz, board notes,
+% exercise/solution boxes, scan page references, and control-notation macros.
+
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning,shapes.geometric,shapes.misc,patterns,
+  decorations.pathmorphing,decorations.markings,fit,backgrounds,intersections,angles,quotes}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepgfplotslibrary{fillbetween}
+\RequirePackage[siunitx]{circuitikz}
+\RequirePackage{siunitx}
+\sisetup{detect-all=true}
+\RequirePackage{multirow,makecell,tabularx}
+\RequirePackage{bm}
+\RequirePackage{float}
+\RequirePackage{longtable}
+\numberwithin{equation}{section}
+
+% ---- extra colours (itublue and itugold come from ituphd.cls) ---------------
+\definecolor{boardgreen}{HTML}{1B8A6B}
+\definecolor{boardred}{HTML}{B03A2E}
+\definecolor{gridgray}{HTML}{C9CDD3}
+
+% ---- notation ---------------------------------------------------------------
+\providecommand{\dd}{\mathrm{d}}
+\newcommand{\ZT}[1]{\mathcal{Z}\!\left[#1\right]}
+\newcommand{\LT}[1]{\mathcal{L}\!\left[#1\right]}
+\newcommand{\IZT}[1]{\mathcal{Z}^{-1}\!\left[#1\right]}
+\newcommand{\ee}{\mathrm{e}}
+\newcommand{\jj}{\mathrm{j}}
+\newcommand{\GZAS}{G_{\mathrm{ZAS}}}
+\newcommand{\GZOH}{G_{\mathrm{ZOH}}}
+\newcommand{\Real}{\operatorname{Re}}
+\newcommand{\Imag}{\operatorname{Im}}
+\newcommand{\wn}{\omega_n}
+\newcommand{\wdd}{\omega_d}
+\newcommand{\ws}{\omega_s}
+
+% ---- scan references and lecture dates -------------------------------------
+\newcommand{\scanref}[1]{\par\vspace{-0.6em}{\small\sffamily\color{gray}Handwritten notes, #1}\par\vspace{0.2em}}
+\newcommand{\lecdate}[1]{\par\nopagebreak\noindent\hfill{\small\sffamily\color{itugold}Lecture of #1}\par}
+
+% ---- board note: where the handwritten page differs from the typeset text ----
+\newtcolorbox{boardnote}[1][]{enhanced,breakable,sharp corners,colback=boardred!5,
+  colframe=boardred!70,boxrule=0pt,borderline west={2.5pt}{0pt}{boardred!80},
+  frame hidden,left=9pt,right=6pt,top=4pt,bottom=4pt,before skip=8pt,after skip=8pt,
+  fontupper=\small,
+  before upper={\textbf{\sffamily\color{boardred}Board note.}\ }}
+
+% ---- examples (boxed) -------------------------------------------------------
+\tcbset{examplestyle/.style={enhanced,breakable,sharp corners,frame hidden,boxrule=0pt,
+  left=9pt,right=6pt,top=3pt,bottom=3pt,before skip=8pt,after skip=8pt,
+  colback=black!3,borderline west={1.2pt}{0pt}{black!35}}}
+\tcolorboxenvironment{example}{examplestyle}
+
+% ---- exercises left to the students on the board, and added solutions -------
+\newcounter{bex}[section]
+\renewcommand{\thebex}{\thesection.\arabic{bex}}
+\newenvironment{bexercise}{\refstepcounter{bex}\par\medskip\noindent
+  {\sffamily\bfseries\color{itugold}Board exercise \thebex.}\ \itshape}{\par\medskip}
+\newtcolorbox{addsol}{enhanced,breakable,sharp corners,frame hidden,boxrule=0pt,
+  colback=white,borderline west={2pt}{0pt}{itublue},left=9pt,top=2pt,bottom=2pt,
+  before skip=6pt,after skip=8pt,
+  before upper={\textbf{\sffamily\color{itublue}Added solution.}\ }}
+
+% ---- additional problems: numbered inside each section ----------------------
+\makeatletter
+\@addtoreset{problem}{section}
+\renewcommand{\theproblem}{\thesection.\arabic{problem}}
+\makeatother
+\newcommand{\addedsection}[1][Additional problems and solutions]{%
+  \subsection*{#1}
+  {\small\sffamily\color{gray}Not from the board: practice problems that follow the lecture
+   material of this section. All numerical answers were checked with code.}\par}
+
+% ---- two-column table helper ------------------------------------------------
+\renewcommand{\arraystretch}{1.25}
+
+% ---- shared TikZ styles -----------------------------------------------------
+\tikzset{
+  >={Stealth[length=2.4mm,width=1.8mm]},
+  blk/.style={draw=itublue,thick,rectangle,minimum height=8mm,minimum width=14mm,
+    inner sep=3pt,fill=white,align=center,font=\small},
+  sumj/.style={draw=itublue,thick,circle,inner sep=0pt,minimum size=5mm,fill=white},
+  sig/.style={thick,->},
+  gridl/.style={very thin,gridgray},
+  hand/.style={thick,itublue},
+  accent/.style={thick,boardgreen},
+  dot/.style={circle,fill,inner sep=1.4pt},
+  pole/.style={cross out,draw=itublue,thick,inner sep=0pt,minimum size=4.5pt},
+  zero/.style={circle,draw=itublue,thick,inner sep=0pt,minimum size=4.5pt},
+  lab/.style={font=\small},
+}
+
+% ---- ideal sampler symbol (pic): \pic (name) at (x,y) {sampler}; anchors name-in, name-out
+\tikzset{sampler/.pic={
+  \draw[thick] (0,0) -- (0.25,0);
+  \draw[thick] (0.25,0) -- (0.58,0.23);
+  \draw[thick] (0.62,0) -- (0.87,0);
+  \fill (0.25,0) circle (1.3pt); \fill (0.62,0) circle (1.3pt);
+  \node[font=\scriptsize] at (0.42,0.40) {$T$};
+  \coordinate (-in) at (0,0);
+  \coordinate (-out) at (0.87,0);}}
+\endinput

@@ -1,0 +1,405 @@
+\section{Digital Control System Design in the $z$ Domain}\label{sec:design}
+\lecdate{25 November and 2 December 2019}
+\input{figures/fig-ch5-diagrams}
+
+There are two ways to design a digital controller:
+\begin{enumerate}
+  \item The digital controller can be designed directly in the $z$ domain (this chapter).
+  \item The digital controller can be obtained from the model of an analog controller (next chapter).
+\end{enumerate}
+
+%==============================================================================
+\subsection{$z$-domain root locus}\scanref{pp.\,61--63}
+The root locus method provides information about the closed-loop system behaviour based on its open-loop
+poles and zeros. In continuous time,
+\[
+  1+K\,L(s)=0,\qquad K:\ \text{design parameter},\quad L(s):\ \text{loop gain.}
+\]
+Two conditions and the related rules are used to obtain root-locus plots:
+\begin{align*}
+  \text{Magnitude condition:}&\quad K\,|L(s)|=1,\\
+  \text{Angle condition:}&\quad \angle L(s)=\pm(2m+1)\,180^{\circ},\qquad m=0,1,2,\dots
+\end{align*}
+In discrete time,
+\begin{equation}
+  1+K\,L(z)=0,\qquad L(z)=C(z)\,\GZAS(z),\qquad C(z)=K\,\frac{N_c(z)}{D_c(z)}.
+\end{equation}
+All the rules derived for continuous time are applicable to discrete-time systems:
+\begin{itemize}
+  \item The number of root-locus branches equals the number of open-loop poles of $L(z)$.
+  \item Root-locus branches start at open-loop poles and end at open-loop zeros or at $\infty$.
+  \item The real-axis root loci have an odd number of poles plus zeros to their right (a point of the real
+        axis belongs to the locus if the number of real poles and zeros to its right is odd).
+\end{itemize}
+\begin{itemize}
+  \item The branches going to infinity asymptotically approach straight lines defined by the angle
+  \begin{equation}
+    \phi_a=\pm\frac{(2m+1)\,180^{\circ}}{n_p-n_z},\qquad m=0,1,2,\dots
+  \end{equation}
+  and the intercept at the point
+  \begin{equation}
+    \sigma_a=\frac{\sum p-\sum z}{n_p-n_z}.
+  \end{equation}
+  \item Breakaway points (points of departure from the real axis) correspond to local maxima of $K$, whereas
+  break-in points (points of arrival at the real axis) correspond to local minima of $K$.
+  \item The angle of departure from a complex pole $p_n$ is given by
+  \[
+    180^{\circ}-\sum(\angle p_n-\angle p_i)+\sum(\angle p_n-\angle z_i).
+  \]
+\end{itemize}
+
+\begin{example}[First-order type-1 system]
+Obtain the root locus plot and the critical gain $K_{cr}$ for the first-order type-1 system with the loop gain
+$L(z)=\dfrac{1}{z-1}$.
+
+\begin{figure}[H]
+\centering
+\figRLfirst
+\caption{Root locus of $L(z)=1/(z-1)$ with the critical gain at $z=-1$.}
+\end{figure}
+\noindent The root locus lies entirely on the real axis between the open-loop pole $z_1=1$ and $-\infty$
+(for $K>0$ the closed-loop pole is $z=1-K$). At the stability limit $z_1=-1$, the magnitude condition gives
+\[
+  K\,|L(z)|=1\ \to\ K\left|\frac{1}{z-1}\right|_{z=-1}=1\ \to\ K_{cr}=2.
+\]
+\end{example}
+
+\begin{boardnote}
+The board states that the locus lies on the real axis ``between open-loop pole and $\infty$''. It is the part
+to the left of the pole, i.e.\ towards $-\infty$, and it crosses the unit circle at $z=-1$. This is the one
+the sketch shows.
+\end{boardnote}
+
+\begin{example}[Second-order type-1 system]
+Same question with $L(z)=\dfrac{1}{(z-1)(z-0.5)}$.
+
+The open-loop poles are $z_1=1$ and $z_2=0.5$, with no finite zero ($n_p=2$, $n_z=0$):
+\[
+  \phi_a=\pm\frac{(2m+1)\,180^{\circ}}{2-0}=\pm90^{\circ},\qquad
+  \sigma_a=\frac{1+0.5}{2-0}=0.75.
+\]
+The characteristic equation is
+\[
+  1+K\,L(z)=0\ \to\ 1+\frac{K}{(z-1)(z-0.5)}=0\ \to\ (z-1)(z-0.5)+K=z^{2}-1.5z+K+0.5=0.
+\]
+The locus leaves the real axis at the breakaway point $z=0.75$ (where $K=-(z-1)(z-0.5)$ is at a maximum,
+$K=0.0625$) and then follows the vertical asymptote $\Real[z]=0.75$. It crosses the unit circle where
+$|z_{1,2}|^{2}=1$. For the complex pair $z_{1,2}=a\pm\jj b$ the characteristic polynomial is
+$z^{2}-2a\,z+a^{2}+b^{2}$, and $|z_{1,2}|^{2}=\bigl(\sqrt{a^{2}+b^{2}}\bigr)^{2}=a^{2}+b^{2}$, hence
+\[
+  |z_{1,2}|^{2}=1=K+0.5\ \Rightarrow\ K=0.5,\qquad z_{1,2}=0.75\pm\jj0.661.
+\]
+\begin{figure}[H]
+\centering
+\figRLsecond
+\caption{Root locus of $L(z)=1/\bigl((z-1)(z-0.5)\bigr)$; the locus crosses the unit circle at $K=0.5$.}
+\end{figure}
+\end{example}
+
+\begin{boardnote}
+The board writes the asymptote angles as $\pm90^{\circ},\ \pm180^{\circ}$ and the intercept as
+$\dfrac{-1-0.5}{2-0}=-0.75$. With the open-loop poles at $+1$ and $+0.5$, two asymptotes exist
+($n_p-n_z=2$), at $\pm90^{\circ}$, and $\sigma_a=\dfrac{1+0.5}{2}=+0.75$; this is also where the board draws
+the vertical line in its figure. The typeset values above are therefore $\pm90^{\circ}$ and $+0.75$.
+\end{boardnote}
+
+\addedsection[Added problems: root locus in the $z$ plane]
+\begin{problem}[Critical gain]
+For $L(z)=\dfrac{1}{(z-1)(z-0.5)}$ verify $K_{cr}=0.5$ with the Jury conditions, and find the gain at the
+breakaway point.
+\end{problem}
+\begin{solution}
+The characteristic polynomial is $z^{2}-1.5z+(0.5+K)$ with $a_2=1$, $a_1=-1.5$, $a_0=0.5+K$:
+$a_2-a_1+a_0=3+K>0$, $a_2+a_1+a_0=K>0$, $|a_0|<a_2\Rightarrow0.5+K<1\Rightarrow K<0.5$. So stable for
+$0<K<0.5$: $K_{cr}=0.5$, matching the locus. The breakaway point is at $z=0.75$ (the maximum of
+$K(z)=-(z-1)(z-0.5)$), with $K=0.25\cdot0.25=0.0625$: for $K<0.0625$ the closed-loop poles are real, for larger
+$K$ complex.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{$z$-domain pole locations and time responses}\scanref{pp.\,63--64}
+\begin{figure}[H]
+\centering
+\resizebox{0.95\linewidth}{!}{\figSpoles}\\[2mm]
+\resizebox{0.95\linewidth}{!}{\figZpoles}
+\caption{Pole locations in the $s$ domain and in the $z$ domain, and the associated time responses
+(sketches).}
+\end{figure}
+
+\begin{itemize}
+  \item Positive real poles are associated with exponentials, like the continuous case.
+  \item Negative real poles are associated with sequences of alternating signals.
+\end{itemize}
+To obtain the desired relationship between $s$-domain and $z$-domain poles we examine two key cases (a real pole
+and a complex-conjugate pair of poles). More complex time functions can be reduced to these cases by
+partial-fraction expansion.
+
+\begin{center}
+\resizebox{\linewidth}{!}{%
+\renewcommand{\arraystretch}{2.2}
+\begin{tabular}{@{}c c c c@{}}
+Continuous & Laplace & Sampled & $z$ transform\\\hline
+$f(t)=\ee^{-\alpha t},\ t\ge0$ & $F(s)=\dfrac{1}{s+\alpha}$ & $f(kT)=\ee^{-\alpha kT},\ k\ge0$ & $F(z)=\dfrac{z}{z-\ee^{-\alpha T}}$\\
+$f(t)=\ee^{-\alpha t}\sin(\wdd t)$ & $F(s)=\dfrac{\wdd}{(s+\alpha)^{2}+\wdd^{2}}$ & $f(kT)=\ee^{-\alpha kT}\sin(\wdd kT)$ &
+$F(z)=\dfrac{\sin(\wdd T)\,\ee^{-\alpha T}\,z}{z^{2}-2\cos(\wdd T)\,\ee^{-\alpha T}z+\ee^{-2\alpha T}}$
+\end{tabular}}
+\end{center}
+Using the table, it appears that if $F(s)$ has a pole at $-\alpha$, then $F(z)$ has a pole at $\ee^{-\alpha T}$;
+if $F(s)$ has a pole at $(-\zeta\wn+\jj\wdd)$, then $F(z)$ has a pole at $\ee^{(-\zeta\wn+\jj\wdd)T}$.
+We conclude that
+\begin{equation}
+  p_z=\ee^{p_sT}\qquad(\text{like }z=\ee^{sT}).
+\end{equation}
+If $p_s=\sigma\pm\jj\wdd$, then $p_z=\ee^{(\sigma\pm\jj\wdd)T}=\ee^{\sigma T}\,\ee^{\pm\jj\wdd T}=|z|\,\ee^{\pm\jj\angle z}$, so
+\begin{equation}
+  |z|=\ee^{\sigma T},\qquad \angle z=\wdd T.
+\end{equation}
+
+\addedsection[Added problem: mapping $s$ poles to $z$ poles]
+\begin{problem}
+Map the $s$-plane pole $s=-2+\jj4$ into the $z$ plane for $T=0.1\,\mathrm{s}$ and $T=0.5\,\mathrm{s}$, and
+comment.
+\end{problem}
+\begin{solution}
+$z=\ee^{sT}$: for $T=0.1$, $|z|=\ee^{-0.2}=0.8187$ and $\angle z=0.4\,\mathrm{rad}=22.9^{\circ}$, i.e.\
+$z=0.754+0.319\,\jj$. For $T=0.5$, $|z|=\ee^{-1}=0.368$ and $\angle z=2\,\mathrm{rad}=114.6^{\circ}$, i.e.\
+$z=-0.153+0.335\,\jj$. The same analog pole produces a very different $z$ pole as $T$ grows: the angle
+$\wdd T$ increases (fewer samples per oscillation) and the radius shrinks.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{$z$-domain contours}\scanref{pp.\,65--67}
+\paragraph{Reminder: the second-order system in continuous time.} The characteristic equation of a general
+second-order system is
+\[
+  s^{2}+2\zeta\wn s+\wn^{2}=s^{2}+2\zeta\wn s+\zeta^{2}\wn^{2}+\wn^{2}(1-\zeta^{2})
+  =(s+\zeta\wn)^{2}+\underbrace{\wn^{2}(1-\zeta^{2})}_{\wdd^{2}},
+\]
+\[
+  \Rightarrow\ s_{1,2}=-\zeta\wn\pm\jj\wn\sqrt{1-\zeta^{2}}=-\zeta\wn\pm\jj\wdd.
+\]
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.5\linewidth}\figSecondOrderS\end{minipage}\hfill
+\begin{minipage}{0.45\linewidth}
+$\wn$: natural frequency,\\ $\wdd$: damped natural frequency,\\ $\zeta$: damping ratio, $\zeta=\cos\theta$.
+\end{minipage}
+\caption{Poles of the second-order system in the $s$ plane.}
+\end{figure}
+
+\paragraph{The $z$ plane contours.} With $s=\sigma+\jj\wdd$ and $z=\ee^{sT}$,
+\begin{equation}
+  z=\ee^{(\sigma\pm\jj\wdd)T}=\ee^{\sigma T}\,\ee^{\pm\jj\wdd T}=|z|\,\ee^{\pm\jj\angle z},\qquad
+  |z|=\ee^{\sigma T}\ \text{(magnitude)},\quad \angle z=\wdd T\ \text{(angle)}.
+\end{equation}
+\begin{figure}[H]
+\centering
+\resizebox{0.35\linewidth}{!}{\figMapPoint}
+\caption{A pole in the $z$ plane: magnitude $|z|=\ee^{\sigma T}$ and angle $\angle z=\wdd T$.}
+\end{figure}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l l l l@{}}
+Contour & $s$-domain poles & Contour & $z$-domain poles\\\hline
+$\sigma=$ constant & vertical lines & $|z|=\ee^{\sigma T}=$ const. & circles\\
+$\wdd=$ constant & horizontal lines & $\angle z=\wdd T=$ const. & radial lines
+\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\linewidth}{!}{\figSigmaContours}
+\caption{Constant-$\sigma$ contours in the $s$ plane and in the $z$ plane.}
+\end{figure}
+\begin{figure}[H]
+\centering
+\resizebox{0.92\linewidth}{!}{\figWdContours}
+\caption{Constant-$\wdd$ contours in the $s$ plane and in the $z$ plane (the labelled values are the angles
+$\wdd T$ in radians, here for $\wdd T=\pm\pi/4,\pm\pi/2,\pm3\pi/4$).}
+\end{figure}
+
+\paragraph{Remark.} In the $s$ domain the $\zeta$ lines and the $\wn$ contours are also very important for
+designing control systems. For a root-locus MATLAB plot these lines can be added by the \texttt{sgrid} command.
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l l l@{}}
+$\zeta>1$ & real and unequal & overdamped\\
+$\zeta=1$ & real and equal & critically damped\\
+$0<\zeta<1$ & complex conjugate & underdamped\\
+$\zeta=0$ & purely imaginary & undamped
+\end{tabular}
+\end{center}
+
+%------------------------------------------------------------------------------
+\subsection{$\zeta$ and $\wn$ contours in the $z$ domain}\scanref{p.\,68}
+The $z$-domain poles for a second-order underdamped system are
+\[
+  z_{1,2}=\ee^{(-\zeta\wn\pm\jj\wdd)T}.
+\]
+Let $\theta=\wdd T=\wn T\sqrt{1-\zeta^{2}}$, so that $\wn T=\dfrac{\theta}{\sqrt{1-\zeta^{2}}}$. Then
+\[
+  |z|=\ee^{-\zeta\wn T}=\ee^{-\zeta\,\theta/\sqrt{1-\zeta^{2}}}\qquad(\theta\ \text{in radians}),
+\]
+which is the \emph{spiral equation}: the constant-$\zeta$ contours are logarithmic spirals. With $\theta$ in
+degrees, as on the board,
+\begin{equation}
+  |z|=\exp\!\left(-\frac{\zeta\,(\pi/180^{\circ})\,\theta}{\sqrt{1-\zeta^{2}}}\right).
+\end{equation}
+For constant $\wn$: from $\theta=\wn T\sqrt{1-\zeta^{2}}$ we have $\zeta^{2}=1-\left(\dfrac{\theta}{\wn T}\right)^{2}$ and
+\begin{equation}
+  |z|=\ee^{-\zeta\wn T}=\ee^{-\sqrt{(\wn T)^{2}-\theta^{2}}}.
+\end{equation}
+The \texttt{zgrid} command of MATLAB can be used to obtain the $\zeta$ and $\wn$ contours.
+
+\begin{figure}[H]
+\centering
+\figZgrid
+\caption{The $\zeta$ contours (green spirals, $\zeta=0.1,\dots,0.9$) and the $\wn$ contours (grey,
+$\wn=0.1\pi/T,\,0.2\pi/T,\dots,0.9\pi/T$) in the $z$ plane, as produced by \texttt{zgrid}.}
+\end{figure}
+
+\addedsection[Added problem: reading $\zeta$ and $\wn$ from a pole]
+\begin{problem}
+A closed-loop pole pair is at $z=0.75\pm\jj0.41$ with $T=0.1\,\mathrm{s}$. Find $\zeta$, $\wn$ and the
+settling time.
+\end{problem}
+\begin{solution}
+$|z|=\sqrt{0.75^{2}+0.41^{2}}=0.8548$ and $\theta=\wdd T=\arctan(0.41/0.75)=0.5003\,\mathrm{rad}$, so
+$\wdd=5.0\,\mathrm{rad/s}$ and $\zeta\wn=-\ln|z|/T=1.573$. Then $\wn=\sqrt{\wdd^{2}+(\zeta\wn)^{2}}=5.24\,\mathrm{rad/s}$,
+$\zeta=1.573/5.24=0.30$ and $T_s=4/(\zeta\wn)=2.54\,\mathrm{s}$. These are the values of design a) below.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Design specifications and proportional control design}\scanref{p.\,69}
+The specifications for $z$-domain design are similar to those for $s$-domain design, such as
+\begin{align*}
+  \text{Time constant}&\ \to\ \tau=\frac{1}{\zeta\wn},\\
+  \text{Settling time (2\%)}&\ \to\ T_s=\frac{4}{\zeta\wn},\\
+  \text{Percentage overshoot}&\ \to\ PO=\ee^{-\pi\zeta/\sqrt{1-\zeta^{2}}}\times100,\\
+  \text{Peak time}&\ \to\ T_p=\frac{\pi}{\wdd}.
+\end{align*}
+
+\paragraph{Proportional control design in the $z$ domain.}
+\begin{itemize}
+  \item Proportional control design involves the selection of a DC gain to satisfy a time-response design
+        specification.
+  \item As in $s$-domain design, it is obtained by tuning the gain to select a dominant closed-loop pair in the
+        appropriate region of the complex plane.
+  \item Analytical design is possible for low-order systems but it is more difficult than its analog counterpart.
+\end{itemize}
+
+\begin{example}[Proportional controller design]
+Design a proportional controller for the digital system $L(z)=\dfrac{1}{(z-1)(z-0.5)}$ with $T=0.1\,\mathrm{s}$
+to obtain
+\begin{enumerate}
+  \item[a)] a damped natural frequency $\wdd$ of $5\,\mathrm{rad/s}$,
+  \item[b)] a time constant $\tau$ of $0.5\,\mathrm{s}$,
+  \item[c)] a damping ratio of $0.7$.
+\end{enumerate}
+
+\paragraph{Graphical approach.}
+\begin{enumerate}
+  \item[a)] $\wdd=5\,\mathrm{rad/s}$: the angle of the pole is $\wdd T=5\cdot0.1=0.5\,\mathrm{rad}$ (a radial line).
+  \item[b)] $\tau=\dfrac{1}{\zeta\wn}=0.5\ \Rightarrow\ \zeta\wn=2$. With $z=\ee^{-(\zeta\wn\pm\jj\wdd)T}$,
+  \[
+    |z|=\ee^{-\zeta\wn T}=\ee^{-2(0.1)}=0.82,
+  \]
+  which shows a circle with radius $\ee^{-\zeta\wn T}$ (parametrised by $x=r\cos\theta$, $y=r\sin\theta$,
+  $\theta=0:2\pi$).
+  \item[c)] $\zeta=0.7$: we have directly the spirals on the $z$ plane to consider.
+\end{enumerate}
+By using the intersection of the lines and curves in the root locus plot we can calculate each $K$ value:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{c c c c}
+Design & Gain $K$ & $\zeta$ & $\wn$ [rad/s]\\\hline
+a) & 0.23 & 0.3 & 5.24\\
+b) & 0.17 & 0.4 & 4.60\\
+c) & 0.10 & 0.7 & 3.63
+\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+\centering
+\figRLdesign
+\caption{Root locus with the three design points; the dashed curves are the $\zeta$ spirals for
+$0.3,\,0.436,\,0.7$ and the circle $|z|=0.82$.}
+\end{figure}
+
+\paragraph{Analytical approach.} The characteristic equation is
+\[
+  1+K\,L(z)=0\ \to\ z^{2}-1.5z+K+0.5=0
+\]
+and it must match the standard second-order equation
+\[
+  z^{2}-2\cos(\wdd T)\,\ee^{-\zeta\wn T}\,z+\ee^{-2\zeta\wn T}.
+\]
+We have two equations:
+\[
+  z^{1}:\ 1.5=2\cos(\wdd T)\,\ee^{-\zeta\wn T},\qquad z^{0}:\ K+0.5=\ee^{-2\zeta\wn T}.
+\]
+\begin{enumerate}
+  \item[a)] $\wdd T=5\cdot0.1=0.5\,\mathrm{rad}$:
+  \[
+    1.5=2\cos(0.5)\,\ee^{-\zeta\wn(0.1)}\ \Rightarrow\ \zeta\wn=1.571\quad(*),\qquad
+    K=\ee^{-2(1.571)(0.1)}-0.5=0.23.
+  \]
+  Using $\wdd T=\wn T\sqrt{1-\zeta^{2}}$: $0.5=0.1\,\wn\sqrt{1-\zeta^{2}}$ $(**)$. By $(*)$ and $(**)$,
+  $\zeta=0.3$ and $\wn=5.24\,\mathrm{rad/s}$.
+  \item[b)] $\tau=\dfrac{1}{\zeta\wn}=0.5\ \to\ \zeta\wn=2$ $(*)$:
+  \[
+    K+0.5=\ee^{-2(2)(0.1)}\ \Rightarrow\ K=0.17.
+  \]
+  \[
+    1.5=2\cos(\wdd T)\ee^{-\zeta\wn T}\ \Rightarrow\ \wdd T=\cos^{-1}\!\left(\frac{1.5}{2\ee^{-\zeta\wn T}}\right)=0.4127,
+  \]
+  and $\wdd T=\wn T\sqrt{1-\zeta^{2}}$, i.e.\ $0.4127=\wn\cdot0.1\sqrt{1-\zeta^{2}}$ $(**)$. By $(*)$ and $(**)$:
+  $\zeta=0.436$ and $\wn=4.586\,\mathrm{rad/s}$.
+  \item[c)] $\zeta=0.7$: $1.5=2\cos\bigl(\wn T\sqrt{1-\zeta^{2}}\bigr)\ee^{-\zeta\wn T}$ gives $\wn=3.63\,\mathrm{rad/s}$ and
+  $K+0.5=\ee^{-2\zeta\wn T}$ gives $K=0.10$.
+\end{enumerate}
+\end{example}
+
+\begin{boardnote}
+(1) In part a) the board's first line (page~70) writes $\wdd=0.5\,\mathrm{rad/s}$ and $\wdd T=0.5\cdot0.1=0.05\,\mathrm{rad}$,
+while the working on the next page (and the answer $\wn=5.24\,\mathrm{rad/s}$) uses $\wdd=5\,\mathrm{rad/s}$ and
+$\wdd T=0.5\,\mathrm{rad}$, as in the problem statement. (2) On page~63 the characteristic equation is
+$z^{2}-1.5z+K+0.5$; on page~71 the second equation is written ``$K-0.5=\ee^{-2\zeta\wn T}$'', but the
+numerical working ($K=\ee^{-2(1.571)(0.1)}-0.5=0.23$) is the one for $K+0.5$. (3) In part b) the table gives $\wn=4.60$ while the working on page~71 gives $4.586$; the computed value is
+$4.586$. The remaining numbers agree with a direct numerical solution ($K=0.230,\ 0.170,\ 0.102$).
+\end{boardnote}
+
+\addedsection[Added problems: proportional design]
+\begin{problem}[Design for a given damping ratio]
+For the same plant ($L=1/((z-1)(z-0.5))$, $T=0.1\,\mathrm{s}$) find the proportional gain that gives
+$\zeta=0.5$ and determine $\wn$, $\wdd$ and the settling time.
+\end{problem}
+\begin{solution}
+Use the analytical approach with $\zeta=0.5$: the condition $1.5=2\cos\bigl(\wn T\sqrt{1-\zeta^{2}}\bigr)\ee^{-\zeta\wn T}$
+is solved numerically, giving $\wn=4.32\,\mathrm{rad/s}$. Then $K=\ee^{-2\zeta\wn T}-0.5=\ee^{-0.432}-0.5=0.149$.
+Check: $z^{2}-1.5z+0.649$ has the roots $0.75\pm0.294\,\jj$ with $|z|=0.806$; these give
+$\zeta\wn=-\ln(0.806)/0.1=2.16$, $\wdd=\angle z/T=3.74\,\mathrm{rad/s}$, so $\wn=4.32$ and $\zeta=0.5$ as required.
+The settling time is $T_s=4/(\zeta\wn)=1.85\,\mathrm{s}$. Note that the closed-loop poles always lie on the
+vertical line $\Real[z]=0.75$ (the locus), so a single gain fixes only \emph{one} of the two quantities
+($\zeta$ or $\wn$), never both.
+\end{solution}
+
+\begin{problem}[Overshoot of the three designs]
+Using $PO=\ee^{-\pi\zeta/\sqrt{1-\zeta^{2}}}\times100$ estimate the overshoot and the settling time of designs
+a)--c), and compare with the step response of the closed loop.
+\end{problem}
+\begin{solution}
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{c c c c c c}
+Design & $K$ & $\zeta$ & $PO$ (formula) & $PO$ (simulated) & $T_s=4/\zeta\wn$\\\hline
+a) & 0.23 & 0.30 & 37.2\% & 38.2\% & 2.5\,s\\
+b) & 0.17 & 0.44 & 21.8\% & 22.3\% & 2.0\,s\\
+c) & 0.10 & 0.70 & 4.6\% & 4.2\% & 1.6\,s
+\end{tabular}
+\end{center}
+The closed loop has a pole at $z=1$ in $L(z)$, so the steady-state error to a step is zero in all three
+cases. The formula and the sampled step responses agree to about one percentage point (the continuous-time
+formula is only an approximation for a sampled system).
+\end{solution}

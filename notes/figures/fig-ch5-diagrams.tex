@@ -1,0 +1,211 @@
+% Figures of Chapter 5 (z-plane root locus, pole contours, proportional design).
+
+% --- small response sketches -------------------------------------------------------
+% \resp{x}{y}{type}: sketch of a response centred at (x,y); type = const, decay, grow,
+% osc, damp, growosc (continuous) or the sampled kinds sdecay, sgrow, salt, saltdecay, saltgrow, sconst
+\newcommand{\resp}[3]{%
+\begin{scope}[shift={(#1,#2)},scale=0.55]
+  \draw[gray,thin] (-0.1,0) -- (2.0,0);
+  \draw[gray,thin] (0,-0.9) -- (0,0.9);
+  \def\rtype{#3}
+  \ifx\rtype\relax\fi
+  \ifnum\pdfstrcmp{#3}{const}=0 \draw[itublue,thick] (0,0.5) -- (1.9,0.5);\fi
+  \ifnum\pdfstrcmp{#3}{decay}=0 \draw[itublue,thick,domain=0:1.9,samples=25] plot (\x,{0.8*exp(-2.2*\x)});\fi
+  \ifnum\pdfstrcmp{#3}{grow}=0 \draw[itublue,thick,domain=0:1.9,samples=25] plot (\x,{0.04*exp(2.0*\x)});\fi
+  \ifnum\pdfstrcmp{#3}{osc}=0 \draw[itublue,thick,domain=0:1.9,samples=50] plot (\x,{0.6*sin(\x*540)});\fi
+  \ifnum\pdfstrcmp{#3}{damp}=0 \draw[itublue,thick,domain=0:1.9,samples=60] plot (\x,{0.8*exp(-1.8*\x)*sin(\x*540)});\fi
+  \ifnum\pdfstrcmp{#3}{growosc}=0 \draw[itublue,thick,domain=0:1.9,samples=60] plot (\x,{0.07*exp(1.6*\x)*sin(\x*540)});\fi
+  \ifnum\pdfstrcmp{#3}{sdecay}=0 \foreach \k in {0,...,6}{\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,{0.8*exp(-0.45*\k)});\fill[itublue] (\k*0.28,{0.8*exp(-0.45*\k)}) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{sgrow}=0 \foreach \k in {0,...,6}{\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,{0.1*exp(0.5*\k)});\fill[itublue] (\k*0.28,{0.1*exp(0.5*\k)}) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{sconst}=0 \foreach \k in {0,...,6}{\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,0.5);\fill[itublue] (\k*0.28,0.5) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{salt}=0 \foreach \k in {0,...,6}{\pgfmathsetmacro{\v}{0.5*(-1)^\k}\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,\v);\fill[itublue] (\k*0.28,\v) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{saltdecay}=0 \foreach \k in {0,...,6}{\pgfmathsetmacro{\v}{0.8*exp(-0.45*\k)*(-1)^\k}\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,\v);\fill[itublue] (\k*0.28,\v) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{saltgrow}=0 \foreach \k in {0,...,6}{\pgfmathsetmacro{\v}{0.1*exp(0.5*\k)*(-1)^\k}\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,\v);\fill[itublue] (\k*0.28,\v) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{sdamp}=0 \foreach \k in {0,...,6}{\pgfmathsetmacro{\v}{0.8*exp(-0.35*\k)*sin(\k*80)}\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,\v);\fill[itublue] (\k*0.28,\v) circle (1.2pt);}\fi
+  \ifnum\pdfstrcmp{#3}{sgrowosc}=0 \foreach \k in {0,...,6}{\pgfmathsetmacro{\v}{0.1*exp(0.45*\k)*sin(\k*80)}\draw[itublue,thick] (\k*0.28,0) -- (\k*0.28,\v);\fill[itublue] (\k*0.28,\v) circle (1.2pt);}\fi
+\end{scope}}
+
+% ---- p.63: s-plane pole locations and responses -----------------------------------
+\newcommand{\figSpoles}{%
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \draw[->] (-4.6,0) -- (4.6,0) node[right,lab]{$\sigma$};
+  \draw[->] (0,-1.5) -- (0,3.4) node[above,lab]{$\jj\omega$};
+  \node[pole,draw=boardgreen] at (-2.3,0) {}; \node[pole,draw=boardgreen] at (2.3,0) {};
+  \node[pole,draw=boardgreen] at (0,0) {}; \node[pole,draw=boardgreen] at (0,2.2) {};
+  \node[pole,draw=boardgreen] at (-3.6,2.3) {}; \node[pole,draw=boardgreen] at (-3.6,1.2) {};
+  \node[pole,draw=boardgreen] at (2.4,2.0) {};
+  \resp{-2.8}{-1.15}{decay}; \resp{-0.4}{-1.15}{const}; \resp{1.7}{-1.15}{grow};
+  \resp{0.25}{2.1}{osc}; \resp{-4.45}{2.2}{damp}; \resp{-4.45}{1.1}{decay};
+  \resp{3.0}{1.8}{growosc};
+  \node[lab] at (-2.3,0.35) {$-a$};
+\end{tikzpicture}}
+
+% ---- p.63: z-plane pole locations and responses -----------------------------------
+\newcommand{\figZpoles}{%
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \draw[thick,itublue] (0,0) circle (2.0);
+  \draw[->] (-5.3,0) -- (5.3,0) node[right,lab]{$\Real[z]$};
+  \draw[->] (0,-2.4) -- (0,2.7) node[above,lab]{$\Imag[z]$};
+  \foreach \px/\ty in {-4.4/saltgrow,-2.0/salt,-1.0/saltdecay,1.0/sdecay,2.0/sconst,3.4/sgrow}{
+    \node[pole,draw=boardgreen] (p\ty) at (\px,0) {};
+    \draw[->,gray] (\px,-0.15) -- (\px,-2.55);
+    \resp{\px-0.5}{-3.45}{\ty};
+  }
+  \node[pole,draw=boardgreen] at (0.9,1.2) {}; \resp{1.0}{1.45}{sdamp};
+  \node[pole,draw=boardgreen] at (-3.4,1.3) {}; \resp{-4.6}{1.55}{sgrowosc};
+\end{tikzpicture}}
+
+% ---- p.66: z = e^{sT}: |z| and angle; sigma const and wd const contours ----------
+\newcommand{\figMapPoint}{%
+\begin{tikzpicture}
+  \draw[thick,gray] (0,0) circle (1.5);
+  \draw[->] (-2.1,0) -- (2.3,0) node[right,lab]{$\Real[z]$};
+  \draw[->] (0,-1.8) -- (0,2.0) node[above,lab]{$\Imag[z]$};
+  \node[lab,below left] at (-1.5,0) {$-1$}; \node[lab,below right] at (1.5,0) {$1$};
+  \coordinate (pz) at (0.82,1.02);
+  \draw[boardgreen,thick] (0,0) -- (pz) node[midway,above left,lab]{$|z|$};
+  \node[pole,draw=boardgreen] at (pz) {};
+  \draw[boardgreen] (0.55,0) arc (0:51:0.55); \node[lab,boardgreen] at (0.85,0.28) {$\angle z$};
+\end{tikzpicture}}
+
+\newcommand{\figSigmaContours}{%
+\begin{tikzpicture}
+  \begin{scope}
+    \draw[->] (-2.3,0) -- (2.3,0) node[right,lab]{$\sigma$};
+    \draw[->] (0,-1.7) -- (0,1.8) node[above,lab]{$\jj\omega$};
+    \foreach \sx in {-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0} \draw[gray] (\sx,-1.5) -- (\sx,1.5);
+    \draw[gray] (0,-1.5) -- (0,1.5);
+  \end{scope}
+  \begin{scope}[xshift=6.2cm]
+    \draw[->] (-2.3,0) -- (2.3,0) node[right,lab]{$\Real[z]$};
+    \draw[->] (0,-1.9) -- (0,2.0) node[above,lab]{$\Imag[z]$};
+    \foreach \rr in {0.15,0.4,0.7,1.0,1.35,1.7} \draw[boardgreen,thick] (0,0) circle (\rr);
+  \end{scope}
+\end{tikzpicture}}
+
+\newcommand{\figWdContours}{%
+\begin{tikzpicture}
+  \begin{scope}
+    \draw[->] (-2.4,0) -- (2.4,0) node[right,lab]{$\sigma$};
+    \draw[->] (0,-2.3) -- (0,2.4) node[above,lab]{$\jj\omega$};
+    \foreach \y/\l in {0.55/{\pi/4},1.1/{\pi/2},1.65/{3\pi/4}}{
+      \draw[gray] (-2.2,\y) -- (2.2,\y) node[right,lab,boardgreen]{$\l$};
+      \draw[gray] (-2.2,-\y) -- (2.2,-\y) node[right,lab,boardgreen]{$-\l$};}
+  \end{scope}
+  \begin{scope}[xshift=7.4cm]
+    \draw[->] (-3.0,0) -- (3.1,0) node[right,lab]{$\Real[z]$};
+    \draw[->] (0,-2.3) -- (0,2.9) node[above,lab]{$\Imag[z]$};
+    \foreach \a/\l in {0/{0},45/{\pi/4},90/{\pi/2},135/{3\pi/4},180/{\pm\pi},-45/{-\pi/4},-90/{},-135/{-3\pi/4}}{
+      \draw[boardgreen,thick] (0,0) -- (\a:2.1);
+      \node[lab,boardgreen,font=\scriptsize] at (\a:2.4) {$\l$};}
+  \end{scope}
+\end{tikzpicture}}
+
+% ---- p.65: second-order pole in the s plane ---------------------------------------
+\newcommand{\figSecondOrderS}{%
+\begin{tikzpicture}
+  \draw[->] (-2.6,0) -- (1.8,0) node[right,lab]{$\sigma$};
+  \draw[->] (0,-2.0) -- (0,2.1) node[above,lab]{$\jj\omega$};
+  \coordinate (p) at (-1.5,1.4); \coordinate (q) at (-1.5,-1.4);
+  \node[pole] at (p) {}; \node[pole] at (q) {};
+  \draw[dashed,gray] (p) -- (-1.5,0) node[below left,lab]{$-\zeta\wn$};
+  \draw[dashed,gray] (p) -- (0,1.4) node[right,lab]{$+\jj\wn\sqrt{1-\zeta^{2}}=\jj\wdd$};
+  \draw[dashed,gray] (q) -- (-1.5,0); \draw[dashed,gray] (q) -- (0,-1.4) node[right,lab]{$-\jj\wdd$};
+  \draw[boardgreen,thick] (0,0) -- (p) node[midway,above right,lab]{$\wn$};
+  \draw[boardgreen] (-0.5,0) arc (180:137:0.5); \node[lab,boardgreen] at (-0.75,0.28) {$\theta$};
+\end{tikzpicture}}
+
+% ---- z-plane grid: zeta spirals and wn contours (zgrid) -----------------------------
+% the same curves as MATLAB's zgrid; drawn for the upper half plane and mirrored
+\newcommand{\figZgrid}{%
+\begin{tikzpicture}[scale=3.1]
+  \clip (-1.18,-1.12) rectangle (1.3,1.12);
+  \draw[gray] (0,0) circle (1);
+  \draw[->] (-1.15,0) -- (1.28,0) node[right,lab]{$\Real[z]$};
+  \draw[->] (0,-1.1) -- (0,1.1) node[above,lab]{$\Imag[z]$};
+  % zeta spirals: |z| = exp(-zeta*th/sqrt(1-zeta^2)), th = wd T in [0,pi]
+  \foreach \zt in {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}{
+    \draw[boardgreen,thick] plot[domain=0:180,samples=60,variable=\th]
+      ({exp(-\zt*\th*pi/180/sqrt(1-\zt*\zt))*cos(\th)},{exp(-\zt*\th*pi/180/sqrt(1-\zt*\zt))*sin(\th)});
+    \draw[boardgreen,thick] plot[domain=0:180,samples=60,variable=\th]
+      ({exp(-\zt*\th*pi/180/sqrt(1-\zt*\zt))*cos(\th)},{-exp(-\zt*\th*pi/180/sqrt(1-\zt*\zt))*sin(\th)});
+  }
+  % wn contours: |z| = exp(-sqrt((wnT)^2 - th^2)), th from 0 to wnT (rad), wnT = k pi/10
+  \foreach \kk in {1,2,...,9}{
+    \pgfmathsetmacro{\wnT}{\kk*pi/10}
+    \draw[gray,thick] plot[domain=0:\wnT*180/pi,samples=40,variable=\th]
+      ({exp(-sqrt(max(0,\wnT*\wnT-(\th*pi/180)^2)))*cos(\th)},{exp(-sqrt(max(0,\wnT*\wnT-(\th*pi/180)^2)))*sin(\th)});
+    \draw[gray,thick] plot[domain=0:\wnT*180/pi,samples=40,variable=\th]
+      ({exp(-sqrt(max(0,\wnT*\wnT-(\th*pi/180)^2)))*cos(\th)},{-exp(-sqrt(max(0,\wnT*\wnT-(\th*pi/180)^2)))*sin(\th)});
+  }
+  \node[lab,boardgreen,fill=white,inner sep=1pt] at (-0.78,0.60) {$\zeta=0.1$};
+  \node[lab,boardgreen,fill=white,inner sep=1pt] at (0.40,0.15) {$0.9$};
+  \node[lab,fill=white,inner sep=1pt,font=\scriptsize] at (0.78,0.93) {$0.3\pi/T$};
+  \node[lab,fill=white,inner sep=1pt,font=\scriptsize] at (0.98,0.58) {$0.2\pi/T$};
+  \node[lab,fill=white,inner sep=1pt,font=\scriptsize] at (1.12,0.30) {$0.1\pi/T$};
+\end{tikzpicture}}
+
+% ---- p.62: root loci -------------------------------------------------------------
+\newcommand{\figRLfirst}{%
+\begin{tikzpicture}
+  \begin{axis}[width=0.52\linewidth,height=5.2cm,axis lines=middle,xlabel={$\Real[z]$},ylabel={$\Imag[z]$},
+      xmin=-2.6,xmax=2.2,ymin=-1.7,ymax=1.7,axis equal image,xtick={-1,1},ytick=\empty,
+      every axis x label/.style={at={(ticklabel* cs:1.0)},anchor=west},
+      every axis y label/.style={at={(ticklabel* cs:1.0)},anchor=south},clip=false]
+    \draw[gray,thick] (axis cs:0,0) circle[radius=1];
+    \draw[thick,itublue] (axis cs:1,0) -- (axis cs:-2.4,0);
+    \addplot[only marks,mark=x,mark size=3.5pt,very thick,itublue] coordinates {(1,0)};
+    \addplot[only marks,mark=*,mark size=1.8pt,boardred] coordinates {(-1,0)};
+    \node[lab,boardred,below left] at (axis cs:-1,-0.05) {$K_{cr}=2$};
+  \end{axis}
+\end{tikzpicture}}
+
+\newcommand{\figRLsecond}{%
+\begin{tikzpicture}
+  \begin{axis}[width=0.78\linewidth,height=6.4cm,axis lines=middle,xlabel={$\Real[z]$},ylabel={$\Imag[z]$},
+      xmin=-1.35,xmax=1.5,ymin=-1.25,ymax=1.25,axis equal image,xtick={-1,0.5,1},xticklabel style={font=\scriptsize},ytick=\empty,
+      every axis x label/.style={at={(ticklabel* cs:1.0)},anchor=west},
+      every axis y label/.style={at={(ticklabel* cs:1.0)},anchor=south},clip=false]
+    \draw[gray,thick] (axis cs:0,0) circle[radius=1];
+    % real branches: z^2-1.5z+0.5+K=0 for 0<K<0.0625 -> z = 0.75 +- sqrt(0.0625-K)
+    \addplot[thick,itublue,domain=0:0.0625,samples=30] ({0.75+sqrt(0.0625-x)},0);
+    \addplot[thick,itublue,domain=0:0.0625,samples=30] ({0.75-sqrt(0.0625-x)},0);
+    % complex branches for K>0.0625 : z=0.75 +- j sqrt(K-0.0625) (vertical line)
+    \addplot[thick,itublue,domain=0:1.2,samples=2] (0.75,x);
+    \addplot[thick,itublue,domain=0:1.2,samples=2] (0.75,-x);
+    \addplot[only marks,mark=x,mark size=3.5pt,very thick,itublue] coordinates {(0.5,0)(1,0)};
+    \addplot[only marks,mark=*,mark size=1.8pt,boardred] coordinates {(0.75,0.6614)(0.75,-0.6614)};
+    \node[lab,boardred,right] at (axis cs:0.78,0.74) {$K=0.5$};
+    \draw[dashed,gray] (axis cs:0.75,-1.2) -- (axis cs:0.75,1.2);
+    \node[lab,gray,below] at (axis cs:0.75,-1.2) {$\sigma_a=0.75$};
+  \end{axis}
+\end{tikzpicture}}
+
+\newcommand{\zspiral}[1]{\addplot[gray,dashed,domain=0:80,samples=40]
+  ({exp(-#1*rad(x)/sqrt(1-#1*#1))*cos(x)},{exp(-#1*rad(x)/sqrt(1-#1*#1))*sin(x)});}
+
+% ---- design example: root locus with design points -----------------------------------
+\newcommand{\figRLdesign}{%
+\begin{tikzpicture}
+  \begin{axis}[width=\linewidth,height=7.4cm,axis lines=middle,xlabel={$\Real[z]$},ylabel={$\Imag[z]$},
+      xmin=-0.3,xmax=1.15,ymin=-0.62,ymax=0.62,axis equal image,xtick={0,0.5,1},ytick={-0.5,0.5},
+      xticklabel style={font=\scriptsize},yticklabel style={font=\scriptsize},clip=false,
+      every axis x label/.style={at={(ticklabel* cs:1.0)},anchor=west},
+      every axis y label/.style={at={(ticklabel* cs:1.0)},anchor=south}]
+    \addplot[gray,thick,domain=-0.3:1.15,samples=2,draw=none]{0};
+    \addplot[gray,thick,domain=0:40,samples=40]({cos(x)},{sin(x)});
+    % zeta contours 0.3, 0.436, 0.7 (spirals)
+    \zspiral{0.3}\zspiral{0.436}\zspiral{0.7}
+    % constant radius |z|=0.82 circle (tau = 0.5 s)
+    \addplot[boardgreen,dashed,domain=0:90,samples=40]({0.8187*cos(x)},{0.8187*sin(x)});
+    \addplot[thick,itublue,domain=0:0.0625,samples=30] ({0.75+sqrt(0.0625-x)},0);
+    \addplot[thick,itublue,domain=0:0.0625,samples=30] ({0.75-sqrt(0.0625-x)},0);
+    \addplot[thick,itublue,domain=0:0.62,samples=2] (0.75,x);
+    \addplot[thick,itublue,domain=0:0.62,samples=2] (0.75,-x);
+    \addplot[only marks,mark=x,mark size=3.5pt,very thick,itublue] coordinates {(0.5,0)(1,0)};
+    \addplot[only marks,mark=*,mark size=1.8pt,boardred] coordinates {(0.75,0.4097)(0.75,0.3279)(0.75,0.1936)};
+    \node[lab,boardred,left,fill=white,inner sep=1pt] at (axis cs:0.73,0.44) {a) $K=0.23$};
+    \node[lab,boardred,left,fill=white,inner sep=1pt] at (axis cs:0.73,0.33) {b) $K=0.17$};
+    \node[lab,boardred,left,fill=white,inner sep=1pt] at (axis cs:0.73,0.19) {c) $K=0.10$};
+  \end{axis}
+\end{tikzpicture}}

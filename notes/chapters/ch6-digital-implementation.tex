@@ -1,0 +1,513 @@
+\section{Digital Implementation of Analog Controller Design}\label{sec:implementation}
+\lecdate{2, 9 and 16 December 2019}
+\input{figures/fig-ch6-diagrams}
+
+An indirect approach to digital controller design: design the controller in continuous time, then map it to
+the $z$ domain.
+
+%==============================================================================
+\subsection{Procedure}\scanref{p.\,72}
+\begin{enumerate}
+  \item[\textcircled{1}] Design a controller $C_a(s)$ for the analog subsystem $G(s)$ to meet the desired
+        specifications.
+  \item[\textcircled{2}] Map the analog controller to a digital controller $C(z)$ using a suitable transformation.
+  \item[\textcircled{3}] Tune the gain of the transfer function $C(z)\GZAS(z)$ using proportional $z$-domain design to
+        meet the specifications.
+  \item[\textcircled{4}] Check the sampled-time response of the digital control system and repeat steps 1 to 3, if
+        necessary, until the design specifications are met.
+\end{enumerate}
+Step 2 must satisfy the following requirements:
+\begin{itemize}
+  \item A stable analog filter (poles in the LHP) must transform to a stable digital filter.
+  \item The frequency response of the digital filter must closely resemble the frequency response of the analog
+        filter in the frequency range $0\to\dfrac{\ws}{2}$, where $\ws$ is the sampling frequency.
+\end{itemize}
+$\to$ Most digital filter transformations satisfy these requirements to varying degrees.
+
+%------------------------------------------------------------------------------
+\subsection{Difference methods}\scanref{pp.\,73--75}
+\subsubsection*{Forward differencing (Euler approximation)}
+\[
+  \dot y(t)\Big|_{t=kT}=\dot y(kT)\approx\frac{y\bigl((k+1)T\bigr)-y(kT)}{T}.
+\]
+Using $k$ instead of $kT$ for convenience,
+\[
+  \dot y(k)\approx\frac{y(k+1)-y(k)}{T},\qquad sY(s)\approx\frac{zY(z)-Y(z)}{T}
+  \quad\Rightarrow\quad \boxed{\,s\to\frac{z-1}{T}\,}
+\]
+the discrete transformation between $s$ and $z$.
+
+\begin{example}[Forward differencing of a second-order filter]
+Apply the forward differencing method to obtain $C(z)$ and examine the stability of the digital filter for a
+stable analog filter
+\[
+  C_a(s)=\frac{\wn^{2}}{s^{2}+2\zeta\wn s+\wn^{2}},\qquad s=\frac{z-1}{T}.
+\]
+\[
+  C(z)=\frac{(\wn T)^{2}}{z^{2}+2\bigl[\zeta\wn T-1\bigr]z+\bigl[(\wn T)^{2}-2\zeta\wn T+1\bigr]}.
+\]
+The product of the two poles $z_1z_2$ is the constant term, $(\wn T)^{2}-2\zeta\wn T+1$. For a stable analog filter
+$\zeta>0$, $\wn>0$. However, the digital filter is unstable if the product of the poles $|z_1z_2|$ is larger
+than one:
+\[
+  (\wn T)^{2}-2\zeta\wn T+1>1\ \Rightarrow\ \wn^{2}T^{2}>2\zeta\wn T\ \Rightarrow\ \zeta<\frac{\wn T}{2},\qquad\zeta<1.
+\]
+For example, $\wn=10\,\mathrm{rad/s}$ and $T=0.2\,\mathrm{s}$ yields unstable digital filters for any underdamped analog
+filter, since then $\wn T/2=1$.
+\end{example}
+\begin{remark}[added]
+$|z_1z_2|>1$ means that at least one pole is outside the unit circle, so the condition is sufficient for
+instability (for a complex pair, $|z_1|=|z_2|=\sqrt{z_1z_2}$, so it is also necessary). For $\wn=10$, $T=0.2$ and
+$\zeta=0.2,\,0.5,\,0.7$ the pole magnitudes are $2.05,\ 1.73,\ 1.48$ (all outside the unit circle).
+\end{remark}
+
+\begin{figure}[ht]
+\centering
+\begin{minipage}{0.46\linewidth}\centering\resizebox{\linewidth}{!}{\figFwdMap}\\ Forward differencing\end{minipage}\hfill
+\begin{minipage}{0.46\linewidth}\centering\resizebox{0.86\linewidth}{!}{\figBwdMap}\\ Backward differencing\end{minipage}
+\caption{Image of the stable $s$-plane region (hatched): forward differencing maps the left half plane to the
+half plane $\Real[z]<1$, which includes part of the exterior of the unit circle; backward differencing maps it
+into the circle of radius $0.5$ centered at $z=0.5$, which is inside the unit circle.}
+\end{figure}
+
+\subsubsection*{Backward differencing}
+\[
+  \dot y(t)\Big|_{t=kT}\approx\frac{y(k)-y(k-1)}{T},\qquad sY(s)\to\frac{Y(z)-z^{-1}Y(z)}{T},\qquad
+  \boxed{\,s=\frac{1-z^{-1}}{T}=\frac{z-1}{Tz}\,}
+\]
+\begin{example}[Backward differencing of the same filter]
+\[
+  C(z)=\frac{\wn^{2}}{s^{2}+2\zeta\wn s+\wn^{2}}\Big|_{s=\frac{z-1}{Tz}}
+  =\frac{(\wn Tz)^{2}}{\bigl[(\wn T)^{2}+2\zeta\wn T+1\bigr]z^{2}-2\bigl[\zeta\wn T+1\bigr]z+1}
+\]
+(the coefficients are $a_2=(\wn T)^{2}+2\zeta\wn T+1$, $a_1=-2[\zeta\wn T+1]$, $a_0=1$). Stability conditions:
+\begin{enumerate}
+  \item $a_2-a_1+a_0>0\ \Rightarrow\ \bigl[(\wn T)^{2}+2\zeta\wn T+1\bigr]+2\bigl[\zeta\wn T+1\bigr]+1>0$,
+  \item $a_2-a_0>0\ \Rightarrow\ \bigl[(\wn T)^{2}+2\zeta\wn T+1\bigr]-1>0$,
+  \item $a_2+a_1+a_0>0\ \Rightarrow\ \bigl[(\wn T)^{2}+2\zeta\wn T+1\bigr]-2\bigl[\zeta\wn T+1\bigr]+1>0$.
+\end{enumerate}
+For $\zeta>0$, $\wn>0$ all conditions are satisfied (the last one reduces to $(\wn T)^{2}>0$). We can obtain stable digital
+filters for all stable analog filters.
+\end{example}
+
+\addedsection[Added problems: difference methods]
+\begin{problem}[First-order filter]
+For $C_a(s)=\dfrac{a}{s+a}$ with $a=10\,\mathrm{s^{-1}}$ and $T=0.3\,\mathrm{s}$, find the digital pole produced by
+forward differencing, backward differencing and the bilinear transformation. Which is stable? What is the
+stability limit of forward differencing?
+\end{problem}
+\begin{solution}
+Forward: $s=(z-1)/T\Rightarrow z=1-aT=1-3=-2$ (unstable). Backward: $s=(z-1)/(Tz)\Rightarrow z=1/(1+aT)=0.25$
+(stable). Bilinear: $z=(1-aT/2)/(1+aT/2)=-0.2$ (stable, but alternating). Forward differencing is stable only if
+$|1-aT|<1$, i.e.\ $T<2/a=0.2\,\mathrm{s}$. Backward differencing is stable for every $T$ and every $a>0$.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Pole--zero matching}\scanref{pp.\,75--77}
+We know that there exists a mapping from $s$ to $z$ poles, $z=\ee^{sT}$, but no rule exists for mapping zeros.
+In pole--zero matching, a discrete approximation is obtained from an analog filter by mapping \emph{both}
+poles and zeros using $z=\ee^{sT}$. Consider an analog filter with the transfer function
+\[
+  G_a(s)=K\,\frac{\prod_{i=1}^{m}(s-a_i)}{\prod_{j=1}^{n}(s-b_j)}.
+\]
+It has $n$ poles and $m$ zeros; we say that the filter has $n-m$ zeros at infinity. We can obtain the digital
+filter by using pole--zero matching ($z=\ee^{sT}$):
+\begin{equation}\label{eq:pzm}
+  G(z)=K\alpha\,\frac{(z+1)^{n-m-1}\prod_{i=1}^{m}\bigl(z-\ee^{a_iT}\bigr)}{\prod_{j=1}^{n}\bigl(z-\ee^{b_jT}\bigr)}.
+\end{equation}
+We just applied the $z=\ee^{sT}$ transformation to both poles and zeros, and we add $n-m-1$ digital filter
+zeros at $-1$ (``unity'' in the board's wording: at the point of the unit circle corresponding to $\omega_s/2$).
+$\alpha$ is a constant selected for equal filter gain at a critical frequency.
+\begin{itemize}
+  \item For low-pass filters, $\alpha$ is selected to match the DC gains (low-frequency gain at $\omega=0$) using
+        \[G(1)=G_a(0).\]
+  \item For high-pass filters, it is selected to match the high-frequency gain using
+        \[G(-1)=G_a(\infty).\]
+\end{itemize}
+\begin{center}
+\resizebox{0.35\linewidth}{!}{\figMatchPoints}
+\end{center}
+In MATLAB, \texttt{Gz = c2d(Ga,T,'matched')}.
+
+\begin{example}[Second-order low-pass filter]
+Find a pole--zero matched digital filter approximation for the analog filter
+\[
+  G_a(s)=\frac{\wn^{2}}{s^{2}+2\zeta\wn s+\wn^{2}},\qquad\zeta=0.5,\ \wn=5\,\mathrm{rad/s},\ T=0.1\,\mathrm{s}.
+\]
+Check your answer using MATLAB and obtain the frequency response of the filter.
+
+$n=2$ and $m=0$: the analog filter has $n-m=2$ zeros at infinity, so we should add $n-m-1=2-1=1$ digital filter
+zero at $-1$. The poles $s_{1,2}=-\zeta\wn\pm\jj\wdd$ map to $z_{1,2}=\ee^{(-\zeta\wn\pm\jj\wdd)T}$:
+\[
+  G(z)=\frac{\alpha\,(z+1)}{z^{2}-2\ee^{-\zeta\wn T}\cos(\wdd T)\,z+\ee^{-2\zeta\wn T}}.
+\]
+$\alpha$ selection: $G_a(s)$ is a low-pass filter, so $G_a(0)=G(1)=1$, with $\wdd=\wn\sqrt{1-\zeta^{2}}=4.33\,\mathrm{rad/s}$:
+\[
+  \frac{2\alpha}{1-2\ee^{-(0.5)(5)(0.1)}\cos(4.33\times0.1)+\ee^{-2(0.5)(5)(0.1)}}=1\ \Rightarrow\ \alpha=0.09634.
+\]
+Finally, for the given numerical values,
+\[
+  G(z)=\frac{0.09634\,(z+1)}{z^{2}-1.4142\,z+0.6065}.
+\]
+\end{example}
+\begin{remark}[added]
+With more digits the $z$-coefficient is $-2\ee^{-0.25}\cos(0.433)=-1.4138$ (the board rounds it to $-1.4142$); the
+constant term is $\ee^{-0.5}=0.6065$, and $\alpha=0.096343$. The DC gain is exactly $G(1)=1$.
+\end{remark}
+
+\begin{example}[PI controller]
+Consider the PI controller $C_a(s)=\dfrac{10(s+1)}{s}$. Use pole--zero matching to determine a digital
+approximation with $T=0.1\,\mathrm{s}$. Check your answer using MATLAB.
+
+$n=1$ and $m=1$ ($n-m=0$), so we do not need to add digital filter zeros. Matching the zero at $s=-1$ and the pole at
+$s=0$ ($z=\ee^{sT}$ gives $\ee^{-0.1}$ and $1$):
+\[
+  C(z)=\frac{10\alpha\,(z-\ee^{-0.1})}{z-1}.
+\]
+The $\alpha$ selection: for the PI controller the gain at high frequency is constant, so $C_a(\infty)=C(-1)$:
+\[
+  C_a(\infty)=\frac{10(s+1)}{s}\Big|_{s\to\infty}\ \xrightarrow{\ \text{L'H\^opital}\ }\ C_a(\infty)=10,
+\]
+\[
+  C(-1)=\frac{10\alpha\,(-1-\ee^{-0.1})}{-1-1}=10,\quad\alpha=1.05.
+\]
+Finally,
+\[
+  C(z)=\frac{10.5\,z-9.5}{z-1},
+\]
+which we can use as this digital filter in our microcontroller instead of an analog filter.
+\end{example}
+\paragraph{Note.} For PI controllers a high-pass filter match is needed.
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.98\linewidth}{!}{\figMagSketches}
+\caption{Important parts of the system responses: the critical part is the flat low-frequency gain for a
+low-pass filter, and the flat high-frequency gain (high-pass matching) for a PI controller.}
+\end{figure}
+
+\paragraph{Implementation.} Since $C(z)=\dfrac{U(z)}{E(z)}=\dfrac{10.5z-9.5}{z-1}$, the control law that the
+microcontroller executes at each sampling instant is the difference equation
+\[
+  u(k)=u(k-1)+10.5\,e(k)-9.5\,e(k-1).
+\]
+For a constant error $e=1$ the output ramps up by $1$ per sample, $u=10.5,\,11.5,\,12.5,\dots$ (the integral action).
+
+\addedsection[Added problem: pole--zero matching]
+\begin{problem}
+Find the pole--zero matched digital filter of $G_a(s)=\dfrac{10}{s+10}$ for $T=0.05\,\mathrm{s}$.
+\end{problem}
+\begin{solution}
+$n=1$, $m=0$: $n-m-1=0$ so no zero is added, and the pole $s=-10$ maps to $z=\ee^{-0.5}=0.6065$. The filter is low-pass,
+so $G(1)=G_a(0)=1$: $G(z)=\dfrac{\alpha}{z-0.6065}$ with $\alpha=1-0.6065=0.3935$. (This is the same as the ZOH
+equivalent of this first-order filter.)
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Bilinear (Tustin) transformation}\scanref{pp.\,78--79}
+It uses the trapezoidal rule for numerical integration. Consider a continuous-time integrator
+\[
+  y(t)=\int_{0}^{t}u(\tau)\,\mathrm d\tau,
+\]
+where $y(t)$ is the output and $u(t)$ the input. At $t=kT$,
+\[
+  y(kT)=\int_{0}^{kT}u(\tau)\,\mathrm d\tau=\int_{0}^{(k-1)T}u(\tau)\,\mathrm d\tau+\int_{(k-1)T}^{kT}u(\tau)\,\mathrm d\tau.
+\]
+\begin{figure}[ht]
+\centering
+\begin{minipage}{0.58\linewidth}\resizebox{\linewidth}{!}{\figTrapezoid}\end{minipage}\hfill
+\begin{minipage}{0.38\linewidth}
+Area of a trapezoid: $A=\left(\dfrac{a+b}{2}\right)h$, so
+\[
+  A=\frac{u((k-1)T)+u(kT)}{2}\,T.
+\]
+\end{minipage}
+\caption{Trapezoidal-rule approximation of the integral over one sampling period.}
+\end{figure}
+\begin{align*}
+  y(kT)&=y((k-1)T)+A=y((k-1)T)+T\left[\frac{u((k-1)T)+u(kT)}{2}\right],\\
+  Y(z)&=z^{-1}Y(z)+T\left[\frac{z^{-1}U(z)+U(z)}{2}\right]
+  \ \Rightarrow\ \frac{Y(z)}{U(z)}=\frac T2\cdot\frac{1+z^{-1}}{1-z^{-1}}=\frac T2\cdot\frac{z+1}{z-1}.
+\end{align*}
+Since $Y(s)=\dfrac1sU(s)$ (Laplace transform),
+\[
+  \frac1s\approx\frac T2\left(\frac{z+1}{z-1}\right)\ \to\ \boxed{\,s\approx\frac2T\left(\frac{z-1}{z+1}\right)=c\left(\frac{z-1}{z+1}\right),\quad c=\frac2T\,}
+\]
+$C(z)$ can be obtained by the bilinear transformation as follows:
+\[
+  C(z)=C_a(s)\Big|_{s=c\frac{z-1}{z+1}},\qquad C(\ee^{\jj\omega T})=C_a\!\left(c\,\frac{\ee^{\jj\omega T}-1}{\ee^{\jj\omega T}+1}\right).
+\]
+\textbf{Note:} the frequency response of an LTI system can be obtained by using $s=\jj\omega$,
+$z=\ee^{sT}=\ee^{\jj\omega T}$.
+
+\subsubsection*{Frequency mapping and warping}\scanref{p.\,79}
+\[
+  C(\ee^{\jj\omega T})=C_a\!\left(c\,\frac{\ee^{\jj\omega T/2}\bigl(\ee^{\jj\omega T/2}-\ee^{-\jj\omega T/2}\bigr)}{\ee^{\jj\omega T/2}\bigl(\ee^{\jj\omega T/2}+\ee^{-\jj\omega T/2}\bigr)}\right)
+  =C_a\!\left(c\,\frac{\ee^{\jj\omega T/2}-\ee^{-\jj\omega T/2}}{\ee^{\jj\omega T/2}+\ee^{-\jj\omega T/2}}\right),
+\]
+\[
+  C(\ee^{\jj\omega T})=C_a\!\left(\jj c\tan\!\left[\frac{\omega T}{2}\right]\right).
+\]
+At the folding (Nyquist) frequency $\dfrac{\ws}{2}=\dfrac{\pi}{T}$ ($\omega$ ranges over $0\to\dfrac{\ws}{2}$):
+\[
+  C(\ee^{\jj\ws T/2})=C_a\!\left(\jj c\tan\!\left[\frac{\ws}{2}\cdot\frac T2\right]\right)=C_a\!\left(\jj c\tan\!\left[\frac\pi T\cdot\frac T2\right]\right)
+  =C_a\!\left(\jj c\tan\!\left[\frac\pi2\right]\right)=C_a(\jj\infty).
+\]
+We observe that the bilinear mapping squeezes the entire frequency response of an analog filter for a frequency range
+$0\to\infty$ into $0\to\ws/2$. This implies the absence of aliasing (this is why this method is so popular) but also
+results in distortion or \emph{warping} of the frequency response.
+
+\begin{figure}[ht]
+\centering
+\figWarp
+\caption{Frequency warping of the bilinear transformation: the analog frequency $\omega_a$ seen by the digital filter at
+$\omega$ is $\omega_a=\dfrac2T\tan\dfrac{\omega T}{2}$.}
+\end{figure}
+
+\addedsection[Added problem: size of the warping]
+\begin{problem}
+By what percentage does the bilinear transformation overestimate the frequency at $\omega=0.1$, $0.25$, $0.5$ and $0.75$ times the Nyquist frequency $\ws/2$?
+\end{problem}
+\begin{solution}
+The ratio is $\dfrac{\omega_a}{\omega}=\dfrac{\tan(\omega T/2)}{\omega T/2}$ with $\omega T/2=r\pi/2$ where $r=\omega/(\ws/2)$:
+$r=0.1$: $+0.8\%$; $r=0.25$: $\tan(\pi/8)/(\pi/8)=+5.5\%$; $r=0.5$: $\tan(\pi/4)/(\pi/4)=+27.3\%$; $r=0.75$:
+$\tan(3\pi/8)/(3\pi/8)=+104.9\%$. Warping is negligible only well below the Nyquist frequency.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Prewarping}\scanref{p.\,80}
+The relationship between the analog filter and the digital filter frequencies can be written as
+\[
+  C(\ee^{\jj\omega T})=C_a(\jj\omega_a),\qquad\omega_a=\frac2T\tan\!\left[\frac{\omega T}{2}\right]\quad(c=\tfrac2T).
+\]
+If the sampling period $T$ is so small that the effect of warping is negligible, $\omega_a\approx\dfrac2T\dfrac{\omega T}{2}\to\omega_a\approx\omega$.
+In any case, the distortion of the frequency response can be corrected at a single frequency $\omega_0$ using the
+\emph{prewarping} equality
+\[
+  C(\ee^{\jj\omega_0T})=C_a\!\left(\jj c\tan\!\left[\frac{\omega_0T}{2}\right]\right)=C_a(\jj\omega_0)
+  \ \Rightarrow\ c\tan\!\left[\frac{\omega_0T}{2}\right]=\omega_0,
+\]
+\[
+  \boxed{\,c=\frac{\omega_0}{\tan\!\left[\frac{\omega_0T}{2}\right]}\,},\qquad s=c\,\frac{z-1}{z+1}.
+\]
+(With $c=2/T$ one recovers the plain Tustin transformation.) In control applications a suitable choice of $\omega_0$ is the
+$3\,\mathrm{dB}$ frequency for PI or PD controllers, and the upper $3\,\mathrm{dB}$ frequency for a PID controller.
+\begin{center}
+\figThreeDB
+\end{center}
+
+\begin{example}[Tustin with and without prewarping]
+Design a digital filter by applying the bilinear (Tustin) transformation to the analog filter
+$C_a(s)=\dfrac{1}{0.1s+1}$ with $T=0.1\,\mathrm{s}$. Examine the warping effect and then apply prewarping at the
+$3\,\mathrm{dB}$ frequency.
+
+\emph{Tustin method} ($c=2/T=20$):
+\[
+  C(z)=\frac{1}{0.1s+1}\Big|_{s=\frac{2}{0.1}\frac{z-1}{z+1}}=\frac{1}{0.1\cdot\dfrac{2}{0.1}\cdot\dfrac{z-1}{z+1}+1}=\frac{z+1}{3z-1}
+  =\frac{z/3+1/3}{z-1/3}.
+\]
+\emph{Prewarping:} we select the $3\,\mathrm{dB}$ frequency $\omega_0=10\,\mathrm{rad/s}$ as the prewarping frequency,
+$c=\dfrac{\omega_0}{\tan[\omega_0T/2]}=\dfrac{10}{\tan(0.5)}=18.31$:
+\[
+  C(z)=\frac{1}{0.1\cdot\dfrac{10}{\tan\left[\frac{10\cdot0.1}{2}\right]}\cdot\dfrac{z-1}{z+1}+1}\approx\frac{0.35z+0.35}{z-0.29}.
+\]
+\end{example}
+The advantage of prewarping: if our analog filter has important dynamics at some particular frequency, it will be
+captured very well with prewarping.
+
+\begin{remark}[added: numerical check]
+At $\omega_0=10\,\mathrm{rad/s}$ the analog filter has $|C_a(\jj10)|=1/\sqrt2=0.7071$. With prewarping, the digital filter has
+$|C(\ee^{\jj1})|=0.7071$ (and the phase is $-45^{\circ}$, equal to that of the analog filter), whereas the plain Tustin
+filter $\dfrac{z+1}{3z-1}$ gives $|C(\ee^{\jj1})|=0.6752$ and a phase of $-47.5^{\circ}$. The prewarped coefficients are
+$\dfrac{1}{0.1c+1}=0.3533$ and $\dfrac{0.1c-1}{0.1c+1}=0.2934$, which the board rounds to $0.35$ and $0.29$.
+\end{remark}
+
+\addedsection[Added problem: prewarping]
+\begin{problem}
+Apply the Tustin transformation with prewarping at $\omega_0=20\,\mathrm{rad/s}$ to $C_a(s)=\dfrac{1}{0.05s+1}$ with $T=0.1\,\mathrm{s}$.
+\end{problem}
+\begin{solution}
+$c=\dfrac{20}{\tan(1)}=12.84$ ($2/T=20$ would be the plain Tustin value). Then $0.05c=0.6421$ and
+\[
+  C(z)=\frac{1}{0.6421\,\dfrac{z-1}{z+1}+1}=\frac{z+1}{1.6421\,z+0.3579}=0.6090\,\frac{z+1}{z+0.218}.
+\]
+Check: $|C(\ee^{\jj\omega_0T})|=|C(\ee^{\jj2})|=0.7071=1/\sqrt{1+(0.05\cdot20)^{2}}$, as required at the matching frequency.
+With plain Tustin ($c=20$, $C=(z+1)/(2z)$) the magnitude at the same frequency would be $0.540$.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Tustin transformation of PI, PD and PID controllers}\scanref{pp.\,82--83}
+Another advantage of the bilinear (Tustin) transformation is that it maps points in the LHP to the points inside the unit
+circle. This guarantees the stability of a digital filter obtained from an analog one.
+
+\subsubsection*{PI controller}
+With $a=\text{zero location}$ and $c=2/T$,
+\begin{equation}
+  C(z)=\frac{K(s+a)}{s}\Big|_{s=c\frac{z-1}{z+1}}=K\,\frac{a+c}{c}\cdot\frac{z+\dfrac{a-c}{a+c}}{z-1}.
+\end{equation}
+\begin{itemize}
+  \item The digital PI increases the type of the system by one: it improves the steady-state response.
+  \item $n=m$. Hence the calculation of its output from its difference equation requires knowledge of the input at the
+        current time.
+  \item Assuming negligible computational time, the controller is approximately realizable.
+\end{itemize}
+\begin{boardnote}
+The board writes the constant as $K\Bigl(\dfrac{a+c}{a}\Bigr)$. Substituting $s=c(z-1)/(z+1)$ into $K(s+a)/s$ gives
+$K\dfrac{c(z-1)+a(z+1)}{c(z-1)}=K\dfrac{(a+c)}{c}\cdot\dfrac{z+(a-c)/(a+c)}{z-1}$, so the constant is $K\dfrac{a+c}{c}$.
+This is also what the board uses in its own PI design example later ($51.02\cdot\dfrac{1+100}{100}=51.53$).
+\end{boardnote}
+
+\subsubsection*{PD controller}
+\begin{equation}
+  C(z)=K(s+a)\Big|_{s=c\frac{z-1}{z+1}}=K(a+c)\,\frac{z+\dfrac{a-c}{a+c}}{z+1}.
+\end{equation}
+\begin{itemize}
+  \item This includes a zero that can be used to improve the transient response, and a pole at $-1$ that occurs because
+        the control system is not proper (the analog PD has $m>n$).
+  \item A pole at $z=-1$ corresponds to an unbounded frequency response at the folding (Nyquist) frequency,
+        $z=\ee^{\jj\ws T/2}=\ee^{\jj\pi}=-1$; this pole must be eliminated.
+  \item However, eliminating the undesirable pole would result in an unrealizable controller, $m>n$.
+  \item An approximately realizable PD controller can be obtained by replacing the pole at $z=-1$ with a pole at the origin:
+  \[
+    C(z)=\frac{K}{2}(a+c)\,\frac{z+\dfrac{a-c}{a+c}}{z}\qquad(K_{new}=K/2).
+  \]
+\end{itemize}
+
+\subsubsection*{PID controller}
+\[
+  C(z)=\frac{K(s+a)(s+b)}{s}\Big|_{s=c\frac{z-1}{z+1}}
+  =\frac{K(a+c)(b+c)}{c}\cdot\frac{\Bigl[z+\dfrac{a-c}{a+c}\Bigr]\Bigl[z+\dfrac{b-c}{b+c}\Bigr]}{(z+1)(z-1)}.
+\]
+The approximate PID digital controller replaces $(z+1)$ by $z$ and halves the gain ($K_{new}=K/2$):
+\[
+  C(z)=\frac{K_{new}(a+c)(b+c)}{c}\cdot\frac{\Bigl[z+\dfrac{a-c}{a+c}\Bigr]\Bigl[z+\dfrac{b-c}{b+c}\Bigr]}{z\,(z-1)}.
+\]
+
+\addedsection[Added problems: Tustin of PI and PID]
+\begin{problem}[PI]
+Find the Tustin equivalent of $C_a(s)=\dfrac{5(s+2)}{s}$ for $T=0.1\,\mathrm{s}$ and give the difference equation.
+\end{problem}
+\begin{solution}
+$c=2/T=20$, $K=5$, $a=2$: the constant is $K\dfrac{a+c}{c}=5\cdot\dfrac{22}{20}=5.5$ and the zero is at
+$-\dfrac{a-c}{a+c}=\dfrac{18}{22}=0.8182$:
+\[
+  C(z)=\frac{5.5\,(z-0.8182)}{z-1}=\frac{5.5\,z-4.5}{z-1},\qquad u(k)=u(k-1)+5.5\,e(k)-4.5\,e(k-1).
+\]
+(This agrees with \texttt{scipy.signal.cont2discrete(\dots,'bilinear')}, which returns $[5.5,\,-4.5]/[1,\,-1]$. Note
+that the value $K(a+c)/a=55$ would be wrong: the constant must be $K(a+c)/c$.)
+\end{solution}
+
+\begin{problem}[PID]
+Find the approximate digital PID controller for $C_a(s)=2\,\dfrac{(s+1)(s+5)}{s}$ with $T=0.1\,\mathrm{s}$.
+\end{problem}
+\begin{solution}
+$c=20$, $K=2$, $a=1$, $b=5$. The full Tustin form has the gain $\dfrac{K(a+c)(b+c)}{c}=\dfrac{2\cdot21\cdot25}{20}=52.5$ and zeros at
+$z=0.9048$ ($-\tfrac{a-c}{a+c}=\tfrac{19}{21}$) and $z=0.6$ ($-\tfrac{b-c}{b+c}=\tfrac{15}{25}$):
+\[
+  C(z)=\frac{52.5\,(z-0.9048)(z-0.6)}{(z+1)(z-1)}\ \longrightarrow\ C(z)=\frac{26.25\,(z-0.9048)(z-0.6)}{z\,(z-1)}
+\]
+(the pole at $-1$ replaced by one at the origin, and the gain halved).
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Design examples}\scanref{pp.\,84--87}
+\begin{example}[Digital PI design]
+Design a digital controller with $T=0.02\,\mathrm{s}$ for the given system
+\[
+  G(s)=\frac{1}{(s+1)(s+10)}
+\]
+to obtain zero steady-state error due to a unit step, a damping ratio of $0.7$ and a settling time of about $1\,\mathrm{s}$.
+
+\medskip
+\textbf{Step 1 (analog design).} The plant is of type~0. For $e_{ss}=0$ due to a unit step the system type must be increased by one,
+which gives a PI controller. The simplest design is obtained by pole--zero cancellation:
+\[
+  C_a(s)=K\left(\frac{s+1}{s}\right).
+\]
+The loop gain is $C_a(s)G(s)=\dfrac{K}{s(s+10)}$ and the characteristic equation $1+C_a(s)G(s)=0$:
+\[
+  1+\frac{K}{s(s+10)}=0\ \to\ s^{2}+10s+K=s^{2}+2\zeta\wn s+\wn^{2}.
+\]
+\[
+  2\zeta\wn=10\ \to\ \zeta\wn=5\,\mathrm{rad/s},\qquad \wn=\frac{5}{0.7}=7.142\,\mathrm{rad/s},
+\]
+\[
+  T_{set}=\frac{4}{\zeta\wn}=\frac45=0.8\,\mathrm{s},\qquad K=\wn^{2}=51.02.
+\]
+Therefore $C_a(s)=51.02\left(\dfrac{s+1}{s}\right)$.
+
+\textbf{Step 2 (map to $z$).} The analog model with ADC and sampler is
+\[
+  \GZAS(z)=(1-z^{-1})\ZT{\frac{G(s)}{s}}=1.8604\times10^{-4}\,\frac{z+0.9293}{(z-0.8187)(z-0.9802)}.
+\]
+Bilinear transform of the analog PI controller $C_a(s)$ (Tustin, $c=2/T=100$):
+\[
+  C(z)=51.02\left(\frac{s+1}{s}\right)\Big|_{s=\frac{2}{0.02}\frac{z-1}{z+1}}=51.53\,\frac{z-0.9802}{z-1}.
+\]
+\textbf{Step 3 (tune the gain).} Tune $K$ to obtain $\zeta=0.7$ by using the root locus of $C(z)\GZAS(z)$: for
+$K=0.908\times51.53=46.7$ ($K_{new}$).
+
+\textbf{Step 4.} Check the sampled response: $\zeta=0.7$, $T_s=0.88\,\mathrm{s}$,
+\[
+  C(z)=46.7\,\frac{z-0.9802}{z-1}.
+\]
+\end{example}
+The zero of the digital PI, $z=0.9802=\ee^{-0.02}$, cancels the pole of $\GZAS$ at $0.9802$ (the sampled image of the analog pole $s=-1$),
+exactly as the analog zero cancelled $s=-1$. The remaining loop is the second-order one that the root-locus tuning acts on.
+
+\begin{remark}[added: numerical check]
+With $\GZAS(z)$ as above, the closed loop with $C(z)=51.53\,\dfrac{z-0.9802}{z-1}$ has the dominant poles
+$0.9046\pm0.097\,\jj$ ($\zeta=0.66$, $\wn=7.13\,\mathrm{rad/s}$), a $6.2\%$ overshoot and a $2\%$ settling time of about $0.86\,\mathrm{s}$.
+Reducing the gain to $46.7$ gives $\zeta=0.70$, a $4.6\%$ overshoot and $T_s\approx0.90\,\mathrm{s}$ (the root locus gives $K=46.74$ for exactly
+$\zeta=0.7$, i.e.\ $0.907\times51.53$). The analog design has a $4.6\%$ overshoot and $T_s=0.84\,\mathrm{s}$, so the digital design
+shows only a slight deterioration. The board's $T_s=0.88\,\mathrm{s}$ is within the $0.02\,\mathrm{s}$ step resolution of this check.
+\end{remark}
+
+\begin{example}[Digital PD design]
+Design a digital PD controller with $T=0.02\,\mathrm{s}$ for the given system
+\[
+  G(s)=\frac{1}{s(s+1)(s+10)}
+\]
+to obtain a settling time of about $1\,\mathrm{s}$ and a damping ratio of $0.7$.
+
+The simplest design is by zero cancellation, $C_a(s)=K(s+1)$. The characteristic equation is the same as in the previous
+example, so are the $K$ and $T_s$ values; therefore $C_a(s)=51.02\,(s+1)$. The analog controller with ADC and sampler:
+\[
+  \GZAS(z)=(1-z^{-1})\ZT{\frac{G(s)}{s}}=1.2623\times10^{-6}\,\frac{(z+0.2534)(z+3.535)}{(z-1)(z-0.8187)(z-0.9802)}.
+\]
+Bilinear transformation of the analog PD controller $C_a(s)$ (Tustin):
+\[
+  C(z)=51.02\,(s+1)\Big|_{s=\frac{2}{0.02}\frac{z-1}{z+1}}=5153\,\frac{z-0.9802}{z+1}.
+\]
+Replace $z+1$ by $z$ and halve the gain:
+\[
+  C(z)=2576.5\,\frac{z-0.9802}{z}.
+\]
+\textbf{Step 3:} tune $K$ to obtain $\zeta=0.7$ using the root locus of $C(z)\GZAS(z)$: for $K=0.828\times2576.5=2133.3$, $\zeta=0.7$.
+
+\textbf{Step 4:} check the step response with MATLAB: $T_s=0.94\,\mathrm{s}$.
+\end{example}
+The time response shows a slight deterioration from the analog response, but it meets the design specifications. If not, modify the digital
+design or modify the analog design and then map it to the $z$ domain until the digital filter meets the desired specifications.
+
+The $3\,\mathrm{dB}$ frequency of the analog PD controller is $\omega_0T=0.02\,\mathrm{rad}$, so
+$\tan\!\left(\dfrac{\omega_0T}{2}\right)=\tan(0.01)\approx0.01$: there is no need for prewarping.
+
+\begin{remark}[added: numerical check]
+The check with the poles of $C(z)\GZAS(z)$: for $K=2133.3$ the dominant closed-loop poles are $0.9095\pm0.0841\,\jj$ ($\zeta=0.70$,
+$\wn=6.47\,\mathrm{rad/s}$), a $4.5\%$ overshoot and $T_s=0.94\,\mathrm{s}$. The gain for exactly $\zeta=0.7$ is $2138$, i.e.\ $0.830\times2576.5$, in
+agreement with the board's $0.828$.
+\end{remark}
+
+\addedsection[Added problem: design check of the digital PI]
+\begin{problem}
+In the PI example, what happens to the digital design if the unit-step response is checked with the \emph{unscaled} gain $51.53$
+(i.e.\ the analog gain mapped without the gain tuning of step 3)? Why is step 3 needed?
+\end{problem}
+\begin{solution}
+With $K=51.53$ the dominant poles are $0.9046\pm0.097\,\jj$, giving $\zeta=0.66$ and a $6.2\%$ overshoot instead of the specified
+$\zeta=0.7$ ($4.6\%$ overshoot). The ZOH, the sampling delay (about $T/2$ of extra lag) and the mapping approximation all reduce the
+phase margin slightly, so the analog gain gives less damping than designed. Retuning the gain with the $z$-domain root locus ($K=46.7$,
+a $9\%$ reduction) restores $\zeta=0.7$. The step response has no steady-state error because the loop keeps the integrator pole at
+$z=1$ (type~1).
+\end{solution}

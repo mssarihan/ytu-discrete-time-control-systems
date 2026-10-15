@@ -1,0 +1,71 @@
+\appendix
+\section{Quick Reference}\label{app:reference}
+
+\subsection*{Methods of mapping an analog controller to a digital one}
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\small\begin{tabularx}{\linewidth}{@{}l c X@{}}
+\textbf{Method} & \textbf{Substitution} & \textbf{Remarks}\\\hline
+Forward difference (Euler) & $s=\dfrac{z-1}{T}$ & may map stable poles outside the unit circle\\
+Backward difference & $s=\dfrac{z-1}{Tz}$ & stable analog $\Rightarrow$ stable digital, but strong distortion\\
+Pole--zero matching & $z=\ee^{sT}$ & $n-m-1$ zeros at $z=-1$; $\alpha$ matches DC gain (LPF) or high-frequency gain (HPF/PI)\\
+Bilinear (Tustin) & $s=\dfrac2T\dfrac{z-1}{z+1}$ & stable $\Rightarrow$ stable; no aliasing, frequency warping\\
+Tustin with prewarping & $s=\dfrac{\omega_0}{\tan(\omega_0T/2)}\dfrac{z-1}{z+1}$ & exact match at $\omega_0$ (the $3\,\mathrm{dB}$ frequency)
+\end{tabularx}
+\end{center}
+
+\subsection*{Stability tests for $F(z)=a_nz^{n}+\dots+a_0$}
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l p{0.62\linewidth}@{}}
+Roots (\texttt{roots}, \texttt{pole}) & all $|z_i|<1$\\
+Bilinear $+$ Routh--Hurwitz & $z=\dfrac{1+w}{1-w}$; stable iff no sign change in the first column of the $w$-polynomial\\
+Second order ($a_2>0$) & $a_2-a_1+a_0>0,\quad a_2-a_0>0,\quad a_2+a_1+a_0>0$\\
+Jury test & $F(1)>0$, $(-1)^{n}F(-1)>0$, $|a_0|<a_n$, $|b_0|>|b_{n-1}|$, $\dots$, $|r_0|>|r_2|$
+\end{tabular}
+\end{center}
+
+\subsection*{Steady-state error of a unity-feedback loop ($L=C\,\GZAS$, type $n$)}
+$K_p=L(1)$,\quad $K_v=\dfrac1T(z-1)L(z)\big|_{z=1}$,\quad $K_a=\dfrac1{T^{2}}(z-1)^{2}L(z)\big|_{z=1}$; see Table~\ref{tab:ess} for $e(\infty)$.
+
+\subsection*{Transform pairs used in Chapter~3 and Chapter~5}
+\begin{center}
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}c c c@{}}
+$F(s)$ & $f(kT)$ & $F(z)$\\\hline
+$\dfrac1s$ & $1$ & $\dfrac{z}{z-1}$\\
+$\dfrac1{s^{2}}$ & $kT$ & $\dfrac{Tz}{(z-1)^{2}}$\\
+$\dfrac1{s+a}$ & $\ee^{-akT}$ & $\dfrac{z}{z-\ee^{-aT}}$\\
+$\dfrac{\omega}{(s+a)^{2}+\omega^{2}}$ & $\ee^{-akT}\sin\omega kT$ & $\dfrac{\ee^{-aT}\sin(\omega T)\,z}{z^{2}-2\ee^{-aT}\cos(\omega T)\,z+\ee^{-2aT}}$
+\end{tabular}
+\end{center}
+
+%==============================================================================
+\section{Where the Handwritten Notes Were Corrected}\label{app:slips}
+The typeset text follows the handwritten notes. Where the board contains a slip, the typeset version uses
+the corrected form and a red \emph{Board note} explains the difference. This list is complete for the notes
+(page numbers refer to the scanned handwritten notes).
+
+{\renewcommand{\arraystretch}{1.35}\small
+\begin{longtable}{@{}l l p{0.74\linewidth}@{}}
+\textbf{Section} & \textbf{Page} & \textbf{Board} $\rightarrow$ \textbf{typeset}\\\hline\endhead
+1.4 & 5 & output of the inverting op-amp DAC written without the minus sign; the magnitude is kept\\
+2.2 & 8--10 & $\omega t$ in the sampled sinusoid $\to$ $\omega T$\\
+2.6 & 23--25 & $x(k+3)$ row: last term $-z\,x(0)$ $\to$ $-z\,x(2)$\\
+2.6 & 23--25 & $z/(z+0.5)$ in the difference-equation example $\to$ $z/(z-0.5)$ (result unchanged)\\
+3.1 & 26 & ADC and DAC labels over the wrong blocks of $\GZAS$ $\to$ ZOH = DAC, sampler = ADC\\
+3.2 & 28 & rule of thumb $5\le k\le10$ is marked ``?'' on the board (kept, commented)\\
+3.5 & 33 & $\ZT{1/s^{2}}=z/(z-1)^{2}$ (valid for $T=1$) $\to$ $Tz/(z-1)^{2}$; general result derived, $T=1$ reproduces the board\\
+4.1 & 43 & denominator $N+(z+1)^{n}D$ $\to$ $N+(z-1)^{n}D$\\
+4.1 & 46 & $e(\infty)=K_cK/a$ and ``$K_c\downarrow\Rightarrow e_{ss}\downarrow$'' $\to$ $e(\infty)=a/(a+K_cK)$, decreasing as $K_c$ increases\\
+4.2 & 48 & ``decays if poles are outside'' $\to$ inside; ramp is not exponential, $y(k)=kT$\\
+4.3 & 49 & pole list in (e) contains the zero $0.2$ $\to$ poles $0.1,\,1,\,1$\\
+4.5 & 53 & $\angle w_2>\pm90^{\circ}$ $\to$ $\angle w_2=\pm90^{\circ}$ for a point on the unit circle\\
+4.5 & 54 & printed $F(z)$ does not belong to the $w$-polynomial and Routh table that follow; the example is typeset with the polynomial $z^{3}+1.25z^{2}-1.375z+0.25$ that does; conclusion unchanged\\
+4.6 & 59 & ``(2 or 6)'' as violated Jury conditions $\to$ conditions 2, 5 and 6 (conclusion unchanged)\\
+4.6 & 60 & $|0.6065+0.0902K|<1$ $\to$ $|0.6065+0.00902K|<1$ (the bounds on the board correspond to $0.00902$)\\
+5.1 & 62 & asymptote angles $\pm90^{\circ},\pm180^{\circ}$ and $\sigma_a=-0.75$ $\to$ $\pm90^{\circ}$ and $\sigma_a=+0.75$\\
+5.5 & 70--71 & $\wdd=0.5$ rad/s (with $\wdd T=0.05$) in the working vs.\ $\wdd=5$ rad/s elsewhere $\to$ $\wdd=5$ rad/s, $\wdd T=0.5$; $K-0.5=\ee^{-2\zeta\wn T}$ $\to$ $K+0.5$; $\wn=4.60$ in the table vs.\ $4.586$ in the working\\
+6.3 & 76 & coefficient $-1.4142$ $\to$ $-1.4138$ (rounding only)\\
+6.6 & 82 & PI Tustin constant $K(a+c)/a$ $\to$ $K(a+c)/c$ (the board's own example, $51.53$, uses the latter)\\
+\end{longtable}}

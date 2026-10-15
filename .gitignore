@@ -1,0 +1,37 @@
+# LaTeX build output (compiled PDFs live in build/ and are not tracked)
+build/
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# Generated figures (regenerate with the scripts in code/)
+**/figures/generated/*
+!**/figures/generated/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# MATLAB
+*.asv
+*.autosave
+*.mex*
+
+# Large data: keep outside the repo
+*.mat
+*.h5
+data/
+
+# OS / editor
+.DS_Store
+Thumbs.db

@@ -1,0 +1,689 @@
+\section{Modelling of Digital Control Systems}\label{sec:modelling}
+\lecdate{14 and 21 October 2019}
+\input{figures/fig-ch3-diagrams}
+
+%==============================================================================
+\subsection{Structure of a digital control system}\scanref{p.\,26}
+In a digital control system a computer (or microprocessor) computes the control signal from the sampled
+output; a DAC turns it into an analog signal for the analog system, and an ADC samples the analog output
+for the computer.
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.86\linewidth}{!}{\figDigitalLoop}\\[4mm]
+$\equiv$\\[2mm]
+\resizebox{0.86\linewidth}{!}{\figEquivLoop{$R(z)$}{}}\\[4mm]
+\begin{tabular}{@{}r@{\ }c@{\ }l@{}}
+$\GZAS(z)$ & $\equiv$ & \raisebox{-0.9em}{\resizebox{0.5\linewidth}{!}{\figZASdef}}
+\end{tabular}
+\caption{A digital control system and its equivalent discrete-time representation.}\label{fig:digitalloop}
+\end{figure}
+
+\begin{itemize}
+  \item $C(z)$: transfer function of the digital control system (the controller).
+  \item $\GZAS(z)$: $z$ transform of the DAC (ZOH), the analog subsystem and the ADC (ideal sampler),
+        taken together. (ZOH = zero-order hold, ZAS = ``zero-order hold, analog subsystem, sampler''.)
+\end{itemize}
+
+\begin{boardnote}
+In the board sketch of $\GZAS(z)$ the labels ``ADC'' and ``DAC'' sit over the wrong blocks: the
+ZOH models the \emph{DAC} and the ideal sampler models the \emph{ADC}. The text of the same page
+($\GZAS$ contains ``DAC (ZOH), analog subsystem and ADC (ideal sampler)'') is correct, and the figure
+above uses the correct labels.
+\end{boardnote}
+
+%------------------------------------------------------------------------------
+\subsection{ADC model: the ideal sampler}\scanref{pp.\,26--28}
+\paragraph{Assumptions.}
+\begin{itemize}
+  \item The ADC outputs are exactly equal in magnitude to its inputs (quantization errors are negligible).
+  \item The ADC yields a digital output instantaneously.
+  \item Sampling is perfectly uniform (it occurs at a fixed rate).
+\end{itemize}
+Under these assumptions the ADC can be modelled as an \emph{ideal sampler} with sampling period $T$.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+  \begin{axis}[name=a,width=0.40\linewidth,height=3.8cm,axis lines=left,xlabel={$t$},ylabel={$u(t)$},
+      xmin=0,xmax=6,ymin=0,ymax=2.5,xtick=\empty,ytick=\empty,clip=false]
+    \addplot[itublue,very thick,domain=0:5.6,samples=70]{1.1+0.9*sin(deg(1.25*x+2.4))};
+  \end{axis}
+  \begin{axis}[at={(a.east)},anchor=west,xshift=3.4cm,width=0.44\linewidth,height=3.8cm,axis lines=left,
+      xlabel={$t$},ylabel={$u^{*}(t)$},xmin=0,xmax=6,ymin=0,ymax=2.5,ytick=\empty,
+      xtick={0.5,1,1.5,5},xticklabels={$T$,$2T$,$3T$,$kT$},xticklabel style={font=\scriptsize},clip=false]
+    \addplot[gray,dashed,domain=0:5.6,samples=70]{1.1+0.9*sin(deg(1.25*x+2.4))};
+    \addplot[ycomb,itublue,thick,mark=triangle*,mark size=2.2pt,
+      samples at={0,0.5,...,5.5}]{1.1+0.9*sin(deg(1.25*x+2.4))};
+  \end{axis}
+  \pic at ($(a.east)+(1.3cm,0)$) {sampler};
+  \draw[->,thick] ($(a.east)+(0.5cm,0)$) -- ($(a.east)+(1.3cm,0)$);
+  \draw[->,thick] ($(a.east)+(2.17cm,0)$) -- ($(a.east)+(2.8cm,0)$);
+\end{tikzpicture}
+\caption{Ideal sampler: a continuous signal $u(t)$ becomes the impulse train $u^{*}(t)$ (impulse sampler).}
+\end{figure}
+
+The sampled signal $u^{*}(t)$, a train of impulses, is represented by
+\begin{equation}
+  u^{*}(t)=\sum_{k=0}^{\infty}u(kT)\,\delta(t-kT)
+  =\underbrace{u(0)}_{u_0}\delta(t)+\underbrace{u(T)}_{u_1}\delta(t-T)+\underbrace{u(2T)}_{u_2}\delta(t-2T)
+  +\cdots+\underbrace{u(kT)}_{u_k}\delta(t-kT)+\cdots
+\end{equation}
+where $\sum_{k=0}^{\infty}\delta(t-kT)$ is the train of unit impulses.
+
+\paragraph{Note 1: two alternative definitions of the $z$ transform.}
+\begin{enumerate}
+  \item[(1)] \emph{(old)} Given the sequence $\{u_0,u_1,\dots,u_k,\dots\}$, its $z$ transform is
+  \begin{equation}
+    U(z)=u_0+u_1z^{-1}+u_2z^{-2}+\cdots+u_kz^{-k}+\cdots=\sum_{k=0}^{\infty}u_kz^{-k}\qquad(\text{for }T=1),
+  \end{equation}
+  where $u_0=u(0)$, $u_1=u(T)$, \dots
+  \item[(2)] Given the impulse-train representation of a discrete-time signal,
+  $u^{*}(t)=\sum_{k=0}^{\infty}u_k\,\delta(t-kT)$, its Laplace transform is
+  \begin{equation}
+    U^{*}(s)=u_0+u_1\ee^{-sT}+u_2\ee^{-2sT}+\cdots+u_k\ee^{-ksT}+\cdots=\sum_{k=0}^{\infty}u_k\,\ee^{-ksT}.
+  \end{equation}
+  This is the \emph{alternative} $z$-transform definition: let $z$ be defined by
+  \begin{equation}\label{eq:zes}
+    z=\ee^{sT},
+  \end{equation}
+  so that $z$ and $s$ are related by this equation and $U^{*}(s)\big|_{z=\ee^{sT}}=U(z)$.
+\end{enumerate}
+
+\paragraph{Note 2: selection of the sampling period $T$} is very important.
+\begin{theorem}[Sampling theorem]
+If $\ws$ (the sampling frequency), defined as $\ws=\dfrac{2\pi}{T}$, satisfies $\ws>2\omega_1$, where
+$\omega_1$ is the highest frequency component in the continuous-time signal $u(t)$, then $u(t)$ can be
+reconstructed completely from the sampled signal $u^{*}(t)$.
+\end{theorem}
+In practice a rule of thumb is to choose $\ws=k\omega_1$ with $5\le k\le10$; the choice of the
+constant $k$ depends on the application.
+
+\begin{boardnote}
+The board marks the range $5\le k\le10$ with a question mark. It is kept as written. Read it as a
+starting point, not a law: how large $k$ must be depends on the application, and it is usually referred
+to the fastest dynamics that matter (for control, the closed-loop bandwidth) rather than only to the
+highest frequency in the signal.
+\end{boardnote}
+
+\addedsection[Added problems: sampling]
+\begin{problem}[Choosing $T$]
+A signal contains components up to $50\,\mathrm{Hz}$. (a) What is the largest sampling period allowed by
+the sampling theorem? (b) What period results from the rule of thumb $5\le k\le10$?
+\end{problem}
+\begin{solution}
+$\omega_1=2\pi\cdot50=314.16\,\mathrm{rad/s}$. (a) $\ws>2\omega_1=628.3\,\mathrm{rad/s}$, so
+$T<2\pi/628.3=10\,\mathrm{ms}$. (b) $T=2\pi/(k\omega_1)=1/(50k)$ seconds, i.e.\ $4\,\mathrm{ms}$ for
+$k=5$ and $2\,\mathrm{ms}$ for $k=10$.
+\end{solution}
+
+\begin{problem}[Aliasing]
+A $80\,\mathrm{Hz}$ sine is sampled at $100\,\mathrm{Hz}$. At what frequency does the sampled sequence
+appear to oscillate?
+\end{problem}
+\begin{solution}
+Here $\ws=2\pi\cdot100$ is smaller than $2\cdot2\pi\cdot80$, so the sampling theorem is violated. The
+sample values equal those of a sine at $|80-100|=20\,\mathrm{Hz}$ (with a sign change of phase), so
+the $80\,\mathrm{Hz}$ tone is seen as a $20\,\mathrm{Hz}$ one.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{DAC model: the zero-order hold}\scanref{p.\,29}
+\paragraph{Assumptions.}
+\begin{itemize}
+  \item The DAC outputs are exactly equal in magnitude to its inputs.
+  \item The DAC yields an analog output instantaneously.
+  \item The DAC outputs are constant over each sampling period.
+\end{itemize}
+Under these assumptions the input--output relationship of the DAC, for the input sequence $\{u(k)\}$, is
+\begin{equation}
+  u(t)=u(k),\qquad kT\le t<(k+1)T,\qquad k=0,1,2,\dots
+\end{equation}
+This is the \emph{zero-order hold} (ZOH).
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+  % input sample
+  \draw[thick] (-0.2,0) -- (1.2,0);
+  \draw[thick,itublue] (0.5,0) -- (0.5,1.0); \fill[itublue] (0.5,1.0) circle (1.6pt);
+  \node[lab,below] at (0.5,0) {$kT$};
+  \draw[sig] (1.3,0.3) -- (2.0,0.3);
+  \node[blk,minimum width=26mm,minimum height=14mm] (z) at (3.4,0.3) {Zero-order\\ hold};
+  \draw[sig] (4.8,0.3) -- (5.5,0.3);
+  % output pulse
+  \draw[thick] (5.6,0) -- (8.6,0) node[right,lab]{$t$};
+  \draw[thick,itublue] (5.9,0) -- (5.9,1.0) -- (7.4,1.0) -- (7.4,0);
+  \draw[dotted] (5.9,0) -- (5.9,-0.15); \draw[dotted] (7.4,0) -- (7.4,-0.15);
+  \node[lab,below] at (5.9,-0.1) {$kT$}; \node[lab,below] at (7.4,-0.1) {$(k{+}1)T$};
+\end{tikzpicture}\\[6mm]
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \draw[thick,->] (0,0) -- (7.4,0) node[right,lab]{$t$};
+  \draw[thick,itublue] (0.6,0.8) -- (0.6,0) -- (0.6,0.8) -- (6.9,0.8);
+  \draw[thick,itublue] (3.1,-0.8) -- (6.9,-0.8);
+  \draw[dashed,gray] (0.6,0.8) -- (0.6,-0.1); \draw[dashed,gray] (3.1,0.8) -- (3.1,-0.8);
+  \draw[thick,itublue] (0.6,0) -- (0.6,0.8);
+  \draw[thick,itublue] (3.1,0) -- (3.1,-0.8);
+  \node[lab,below left] at (0.6,0) {$kT$}; \node[lab,above right] at (3.1,0) {$(k{+}1)T$};
+  \node[lab,above left,align=right] at (6.9,0.85) {positive step};
+  \node[lab,below left,align=right] at (6.9,-0.85) {negative step};
+\end{tikzpicture}
+\caption{Zero-order hold: the held pulse equals a positive unit step at $kT$ plus a negative unit step
+at $(k+1)T$ (scaled by $u(k)$).}
+\end{figure}
+
+\paragraph{ZOH transfer function.} Use the Laplace transform of the unit positive and negative steps and
+the time-delay theorem:
+\[
+  \LT{1(t)}=\frac1s,\qquad \LT{1(t-T)}=\frac{\ee^{-sT}}{s}.
+\]
+Subtracting them (the impulse response of the ZOH is the unit pulse $1(t)-1(t-T)$) gives
+\begin{equation}\label{eq:gzoh}
+  \boxed{\,\GZOH(s)=\frac{1-\ee^{-sT}}{s}\,}
+\end{equation}
+
+\addedsection[Added problem: frequency response of the ZOH]
+\begin{problem}
+Show that $\GZOH(\jj\omega)=T\,\ee^{-\jj\omega T/2}\,\dfrac{\sin(\omega T/2)}{\omega T/2}$ and evaluate its
+magnitude and phase at $\omega=\ws/2$.
+\end{problem}
+\begin{solution}
+$\GZOH(\jj\omega)=\dfrac{1-\ee^{-\jj\omega T}}{\jj\omega}
+=\ee^{-\jj\omega T/2}\dfrac{\ee^{\jj\omega T/2}-\ee^{-\jj\omega T/2}}{\jj\omega}
+=T\,\ee^{-\jj\omega T/2}\dfrac{\sin(\omega T/2)}{\omega T/2}$. At $\omega=\ws/2=\pi/T$ we get
+$\omega T/2=\pi/2$: the magnitude is $T\cdot\dfrac{1}{\pi/2}=0.637\,T$ and the phase is $-\pi/2=-90^{\circ}$. The ZOH therefore
+behaves like a low-pass filter with a delay of $T/2$ seconds.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{The transfer function $\GZAS(z)$}\scanref{p.\,30}
+The transfer function of the DAC and the analog subsystem in cascade is
+\begin{equation}
+  G_{\mathrm{ZA}}(s)=G(s)\,\GZOH(s)=\left(\frac{1-\ee^{-sT}}{s}\right)G(s)=(1-\ee^{-sT})\frac{G(s)}{s}.
+\end{equation}
+The corresponding impulse response is
+\begin{equation}
+  g_{\mathrm{ZA}}(t)=g(t)*g_{\mathrm{ZOH}}(t)=g_s(t)-g_s(t-T),
+\end{equation}
+\[
+  g_s(t)=\mathcal{L}^{-1}\!\left[\frac{G(s)}{s}\right],\qquad
+  g_s(t-T)=\mathcal{L}^{-1}\!\left[\ee^{-sT}\frac{G(s)}{s}\right].
+\]
+\begin{itemize}
+  \item The impulse response is the analog system's \emph{step response} minus a second step response
+        delayed by one sampling period.
+  \item It is sampled to give the sampled impulse response
+        \[
+          g_{\mathrm{ZA}}(kT)=g_s(kT)-g_s(kT-T).
+        \]
+\end{itemize}
+By $z$ transforming we obtain the $z$ transfer function of the DAC (ZOH), the analog subsystem and the
+ideal sampler:
+\begin{align}
+  \GZAS(z)&=\ZT{g_s^{*}(t)}-\ZT{g_s^{*}(t-T)}
+  =\ZT{\left[\mathcal{L}^{-1}\!\left[\tfrac{G(s)}{s}\right]\right]^{*}}
+   -z^{-1}\,\ZT{\left[\mathcal{L}^{-1}\!\left[\tfrac{G(s)}{s}\right]\right]^{*}}\notag\\
+  &=(1-z^{-1})\,\ZT{\left[\mathcal{L}^{-1}\!\left[\tfrac{G(s)}{s}\right]\right]^{*}}.
+\end{align}
+The star is written to emphasize that sampling of a time function is necessary before the $z$ transform.
+Finally,
+\begin{equation}\label{eq:gzas}
+  \boxed{\,\GZAS(z)=(1-z^{-1})\,\ZT{\frac{G(s)}{s}}\,}
+\end{equation}
+In calculations we use tables that go directly from $s$ to $z$ ($s\to t\to k\to z$).
+
+\begin{remark}[added]
+$\GZAS(z)$ reproduces, at the sampling instants, the response of the analog system to a piecewise-constant
+input. In particular its DC gain is that of the analog system: $\GZAS(1)=G(0)$ (see the examples below).
+\end{remark}
+
+%------------------------------------------------------------------------------
+\subsection{Examples of $\GZAS(z)$}\scanref{pp.\,31--34}
+
+\begin{example}[Cruise (velocity) control of a vehicle]
+Find $\GZAS(z)$ for the cruise control system of a vehicle, where $u$ is the input force, $v$ is the
+velocity of the car and $b$ is the viscous friction coefficient (Fig.~\ref{fig:cruise}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+  % car
+  \node[draw=itublue,thick,minimum width=16mm,minimum height=9mm,fill=white] (m) at (0,0) {$M$};
+  \fill[itublue!20,draw=itublue,thick] (-0.5,-0.55) circle (0.17); \fill[itublue!20,draw=itublue,thick] (0.5,-0.55) circle (0.17);
+  \draw[thick] (-1.6,-0.72) -- (1.6,-0.72);
+  \draw[sig] (m.east) -- ++(1.1,0) node[right,lab]{$u(t)$};
+  \draw[sig,boardred] (m.west) -- ++(-1.1,0) node[left,lab,text=boardred]{$b\,v(t)$};
+  \draw[sig] (-0.5,0.75) -- (0.8,0.75) node[right,lab]{$x,\,v$};
+\end{tikzpicture}
+\caption{Vehicle model for the cruise-control example.}\label{fig:cruise}
+\end{figure}
+
+\noindent The control loop is the one of Fig.~\ref{fig:digitalloop} with $R(z)=V_{\mathrm{ref}}(z)$ and output $V(z)$.
+Using Newton's law (initial conditions zero):
+\[
+  M\dot v(t)=u(t)-b\,v(t)\ \Rightarrow\ Ms\,V(s)=U(s)-b\,V(s),\qquad
+  G(s)=\frac{V(s)}{U(s)}=\frac{1}{Ms+b}.
+\]
+Rewrite the function as
+\[
+  G(s)=\frac{K}{\tau s+1}=\frac{K/\tau}{s+1/\tau}=\frac{1/M}{s+b/M},\qquad \tau=\frac Mb,\quad K=\frac1b.
+\]
+Then $\GZAS(z)=(1-z^{-1})\,\ZT{G(s)/s}$ with the partial-fraction expansion
+\[
+  \frac{G(s)}{s}=\frac1s\left(\frac{K/\tau}{s+1/\tau}\right)=\frac{A_1}{s}+\frac{A_2}{s+1/\tau},
+\]
+\[
+  A_1=\left[s\cdot\frac1s\frac{K/\tau}{s+1/\tau}\right]_{s=0}=K,\qquad
+  A_2=\left[\left(s+\tfrac1\tau\right)\frac1s\frac{K/\tau}{s+1/\tau}\right]_{s=-1/\tau}=-K,
+\]
+\[
+  \Rightarrow\quad \frac{G(s)}{s}=\frac Ks-\frac{K}{s+1/\tau}.
+\]
+Using $\ZT{1/s}=\dfrac{1}{1-z^{-1}}$ and $\ZT{1/(s+a)}=\dfrac{1}{1-\ee^{-aT}z^{-1}}$:
+\begin{align*}
+  \GZAS(z)&=(1-z^{-1})\left[\frac{K}{1-z^{-1}}-\frac{K}{1-\ee^{-T/\tau}z^{-1}}\right]
+  =K-\frac{K(1-z^{-1})}{1-\ee^{-T/\tau}z^{-1}}\\
+  &=\frac{K\bigl(1-\ee^{-T/\tau}z^{-1}-1+z^{-1}\bigr)}{1-\ee^{-T/\tau}z^{-1}}
+  =\frac{K z^{-1}\bigl(1-\ee^{-T/\tau}\bigr)}{1-\ee^{-T/\tau}z^{-1}}\\
+  &=\boxed{\ \frac{K\bigl(1-\ee^{-T/\tau}\bigr)}{z-\ee^{-T/\tau}}\ }
+\end{align*}
+\end{example}
+
+\begin{example}[Position control of a vehicle]
+Find $\GZAS(z)$ for the position of the car, with $u$ the input force, $x$ the position and $b$ the viscous
+friction coefficient. Newton's law gives
+\[
+  M\ddot x(t)=u(t)-b\,\dot x(t)\ \Rightarrow\ Ms^{2}X(s)=U(s)-bs\,X(s),\qquad
+  G(s)=\frac{X(s)}{U(s)}=\frac{1}{s(Ms+b)}.
+\]
+Rewrite the function ($\tau=M/b$, $K=1/b$):
+\[
+  G(s)=\frac{K}{s(\tau s+1)}=\frac{K/\tau}{s(s+1/\tau)},\qquad
+  \frac{G(s)}{s}=\frac{K/\tau}{s^{2}(s+1/\tau)}=\frac{A_{11}}{s^{2}}+\frac{A_{12}}{s}+\frac{A_2}{s+1/\tau}.
+\]
+The coefficients are
+\[
+  A_{11}=\left[s^{2}\,\frac{K/\tau}{s^{2}(s+1/\tau)}\right]_{s=0}=K,
+\]
+\[
+  A_{12}=\frac{1}{1!}\frac{\mathrm d}{\mathrm ds}\left[\frac{K/\tau}{s+1/\tau}\right]_{s=0}
+  =\frac K\tau\left[\frac{-1}{(s+1/\tau)^{2}}\right]_{s=0}=-K\tau,
+\]
+\[
+  A_2=\left[\left(s+\tfrac1\tau\right)\frac{K/\tau}{s^{2}(s+1/\tau)}\right]_{s=-1/\tau}=K\tau,
+\]
+\[
+  \Rightarrow\qquad \frac{G(s)}{s}=\frac{K}{s^{2}}-\frac{K\tau}{s}+\frac{K\tau}{s+1/\tau}.
+\]
+\end{example}
+
+\begin{boardnote}
+On the board the $z$ transform of $K/s^{2}$ is written as $Kz/(z-1)^{2}$, i.e.\ with the factor $T$ left
+out (valid for $T=1\,\mathrm{s}$). The general result uses $\ZT{1/s^{2}}=Tz/(z-1)^{2}$ and is derived below;
+for $T=1$ it reduces exactly to the final line of the board.
+\end{boardnote}
+
+Continuing the position example for general $T$, with $\alpha=\ee^{-T/\tau}$ and
+$\ZT{1/s^{2}}=\dfrac{Tz}{(z-1)^{2}}$:
+\begin{align*}
+  \GZAS(z)&=\frac{z-1}{z}\left[\frac{KTz}{(z-1)^{2}}-\frac{K\tau z}{z-1}+\frac{K\tau z}{z-\alpha}\right]
+  =\frac{KT}{z-1}-K\tau+\frac{K\tau(z-1)}{z-\alpha}\\
+  &=K\,\frac{T(z-\alpha)-\tau(z-1)(z-\alpha)+\tau(z-1)^{2}}{(z-1)(z-\alpha)}\\
+  &=K\,\frac{(T-\tau+\tau\alpha)\,z+(\tau-\tau\alpha-T\alpha)}{(z-1)(z-\alpha)}.
+\end{align*}
+\begin{equation}\label{eq:position-zas}
+  \boxed{\ \GZAS(z)=K\,\frac{(T-\tau+\tau\alpha)\,z+\bigl(\tau-\alpha(\tau+T)\bigr)}{(z-1)(z-\alpha)},\qquad\alpha=\ee^{-T/\tau}\ }
+\end{equation}
+For $T=1\,\mathrm{s}$ this is the board result
+$K\,\dfrac{(1-\tau+\tau\ee^{-1/\tau})z+(\tau-\ee^{-1/\tau}(\tau+1))}{(z-1)(z-\ee^{-1/\tau})}$.
+
+\begin{example}[Series R--L circuit, inductor voltage as output]\label{ex:rl}
+Find $\GZAS(z)$ for the series R--L circuit with the inductor voltage as output.
+
+\begin{figure}[H]
+\centering
+\begin{circuitikz}[european resistors,european inductors,scale=0.9,transform shape]
+  \draw (0,2) to[R=$R$,o-] (3,2) to[short,-o] (4.6,2);
+  \draw (3,2) to[L=$L$] (3,0);
+  \draw (0,0) to[short,o-o] (4.6,0);
+  \fill (3,2) circle (1.6pt); \fill (3,0) circle (1.6pt);
+  \draw[<->,thick] (-0.35,0.15) -- (-0.35,1.85) node[midway,left]{$V_{in}$};
+  \draw[<->,thick] (4.95,0.15) -- (4.95,1.85) node[midway,right]{$V_o$};
+\end{circuitikz}
+\caption{Series R--L circuit.}
+\end{figure}
+
+\noindent With the current $i$:
+\[
+  V_{in}=Ri+L\frac{\mathrm di}{\mathrm dt},\qquad V_o=L\frac{\mathrm di}{\mathrm dt}
+\]
+\[
+  G(s)=\frac{V_o(s)}{V_{in}(s)}=\frac{Ls\,I(s)}{Ls\,I(s)+R\,I(s)}=\frac{Ls}{Ls+R}=\frac{s}{s+1/\tau},
+\]
+where $\tau=L/R$.
+\[
+  \GZAS(z)=(1-z^{-1})\,\ZT{\frac{G(s)}{s}}=(1-z^{-1})\,\ZT{\frac{1}{s+1/\tau}}
+  =\frac{z-1}{z}\cdot\frac{z}{z-\ee^{-T/\tau}}=\boxed{\ \frac{z-1}{z-\ee^{-T/\tau}}\ }
+\]
+\end{example}
+
+\addedsection[Added problems: computing $\GZAS(z)$]
+\begin{problem}[Cruise control with numbers]
+A car has mass $M=1000\,\mathrm{kg}$ and friction coefficient $b=50\,\mathrm{N\,s/m}$. Find $\GZAS(z)$ for
+$T=1\,\mathrm{s}$, and check its DC gain.
+\end{problem}
+\begin{solution}
+$\tau=M/b=20\,\mathrm{s}$, $K=1/b=0.02$, $\ee^{-T/\tau}=\ee^{-0.05}=0.951229$. Hence
+\[
+  \GZAS(z)=\frac{0.02\,(1-0.951229)}{z-0.951229}=\frac{0.000975}{z-0.9512}.
+\]
+DC gain: $\GZAS(1)=\dfrac{0.000975}{1-0.9512}=0.02=K=G(0)$. \;(Checked against a ZOH discretization with
+\texttt{scipy.signal.cont2discrete}.)
+\end{solution}
+
+\begin{problem}[Position control with numbers]
+Evaluate Eq.~\eqref{eq:position-zas} for $M=b=1$ (so $\tau=K=1$) and $T=0.5\,\mathrm{s}$.
+\end{problem}
+\begin{solution}
+$\ee^{-0.5}=0.606531$. Numerator: $(T-\tau+\tau\ee^{-0.5})=0.5-1+0.6065=0.1065$ and
+$\tau-\ee^{-0.5}(\tau+T)=1-0.6065\cdot1.5=0.0902$. Therefore
+\[
+  \GZAS(z)=\frac{0.1065\,z+0.0902}{(z-1)(z-0.6065)}=\frac{0.1065\,z+0.0902}{z^{2}-1.6065\,z+0.6065}.
+\]
+Both coefficients agree with a numerical ZOH discretization of $1/(s(s+1))$.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Starred Laplace transform and the pulse transfer function}\scanref{pp.\,34--35}
+In analyzing discrete-time control systems we often find that some signals are \emph{starred}, meaning that
+the signals are impulse sampled:
+\begin{itemize}
+  \item $x(t)$: continuous-time signal,
+  \item $x^{*}(t)$: impulse-sampled signal (with an ideal sampler).
+\end{itemize}
+
+\begin{figure}[ht]
+\centering
+\resizebox{0.8\linewidth}{!}{\figStarred}
+\caption{Impulse-sampled input and output of $G(s)$.}
+\end{figure}
+
+\paragraph{Pulse transfer function.} From the figure, $Y(s)=G(s)X^{*}(s)$. Taking the starred transform
+(we may factor out $X^{*}(s)$),
+\begin{equation}
+  Y^{*}(s)=\bigl[G(s)X^{*}(s)\bigr]^{*}=G^{*}(s)\,X^{*}(s).
+\end{equation}
+\begin{equation}
+  G^{*}(s)=\frac{Y^{*}(s)}{X^{*}(s)}\qquad\text{(the pulse transfer function).}
+\end{equation}
+The signal chain is: inverse Laplace transform $\to y(t)$; impulse sampling $\to y^{*}(t),\ y(kT)$;
+Laplace transform and $z$ transform $\to Y^{*}(s),\ Y(z)$.
+
+\begin{itemize}
+  \item $G(s)$: ordinary transfer function, non-periodic.
+  \item $G^{*}(s)$: pulse transfer function, \emph{periodic} (it depends on $\ee^{sT}$, $T=2\pi/\ws$).
+  \item Such periodic systems are generally more complicated to analyze than the original non-periodic
+        system, but they may be analyzed without difficulty if the analysis is carried out in the
+        $z$ domain: $G^{*}(s)\leftrightarrow G(z)$ with $z=\ee^{sT}$.
+\end{itemize}
+
+\addedsection[Added problem: why $X^{*}(s)$ factors out]
+\begin{problem}
+Show that $Y^{*}(s)=G^{*}(s)X^{*}(s)$ when $Y(s)=G(s)X^{*}(s)$.
+\end{problem}
+\begin{solution}
+In the time domain $y(t)=\sum_{m=0}^{\infty}x(mT)\,g(t-mT)$, so at the sampling instants
+$y(kT)=\sum_{m=0}^{k}x(mT)\,g\bigl((k-m)T\bigr)$ (a discrete convolution, since $g(t)=0$ for $t<0$).
+The $z$ transform of a discrete convolution is the product of the $z$ transforms:
+$Y(z)=G(z)X(z)$, and with $z=\ee^{sT}$ this is $Y^{*}(s)=G^{*}(s)X^{*}(s)$.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Effect of the sampler on the transfer function of a cascade}\scanref{pp.\,36--38}
+In a discrete-time system that includes several analog subsystems in cascade and several samplers, the
+\emph{location of the samplers} plays an important role in determining the overall transfer function.
+
+\paragraph{\textcircled{1} The cascade is separated by samplers.} Each block then has a sampled output and
+input, as well as a $z$-domain transfer function.
+\begin{center}
+\resizebox{0.9\linewidth}{!}{\figCascadeS}
+\end{center}
+\begin{align*}
+  X(s)&=H_1(s)\,U^{*}(s), & X^{*}(s)&=H_1^{*}(s)\,U^{*}(s),\\
+  Y(s)&=H_1^{*}(s)\,H_2(s)\,U^{*}(s), & Y^{*}(s)&=H_1^{*}(s)\,H_2^{*}(s)\,U^{*}(s)
+  \ \xrightarrow{\ z=\ee^{sT}\ }\ Y(z)=H_1(z)\,H_2(z)\,U(z).
+\end{align*}
+
+\paragraph{\textcircled{2} The cascade is not separated by samplers.} The components cannot be separated
+after sampling.
+\begin{center}
+\resizebox{0.78\linewidth}{!}{\figCascadeNS}
+\end{center}
+\begin{align*}
+  Y(s)&=\bigl[H_1(s)H_2(s)\bigr]U^{*}(s),\\
+  Y^{*}(s)&=\bigl[H_1(s)H_2(s)\bigr]^{*}U^{*}(s)=(H_1H_2)^{*}(s)\,U^{*}(s)
+  \ \xrightarrow{\ z=\ee^{sT}\ }\ Y(z)=(H_1H_2)(z)\,U(z).
+\end{align*}
+\textbf{Note:} the overall transfer functions are different in the two cases:
+$H_1(z)H_2(z)\ne(H_1H_2)(z)$, where $(H_1H_2)(z)=\ZT{H_1(s)H_2(s)}$.
+
+\begin{example}[Cascade of two analog systems with sampled input]
+Find the equivalent sampled impulse response sequence $h(kT)$ and the equivalent $z$-transfer function of the
+cascade of the two analog systems $H_1(s)=\dfrac{1}{s+2}$ and $H_2(s)=\dfrac{2}{s+4}$ with sampled input.
+
+\begin{center}
+\resizebox{0.78\linewidth}{!}{\figCascadeNS}\\[1mm]
+{\small 1) direct (no sampler between the blocks)}\\[3mm]
+\resizebox{0.9\linewidth}{!}{\figCascadeS}\\[1mm]
+{\small 2) separated (a sampler between the blocks)}
+\end{center}
+
+\textbf{1) No sampler between the blocks.}
+\[
+  H(s)=H_1(s)H_2(s)=\frac{2}{(s+2)(s+4)}=\frac{1}{s+2}-\frac{1}{s+4}.
+\]
+The impulse response of this cascade system is $h(t)=\ee^{-2t}-\ee^{-4t}$; with $t=kT$,
+\[
+  h(kT)=\ee^{-2kT}-\ee^{-4kT},\qquad k\ge0,
+\]
+and thus the $z$ transform is
+\[
+  H(z)=\frac{z}{z-\ee^{-2T}}-\frac{z}{z-\ee^{-4T}}=\frac{(\ee^{-2T}-\ee^{-4T})\,z}{(z-\ee^{-2T})(z-\ee^{-4T})}.
+\]
+
+\textbf{2) A sampler between the blocks.}
+\[
+  H_1(s)=\frac{1}{s+2}\xrightarrow{\ z\ }H_1(z)=\frac{z}{z-\ee^{-2T}},\qquad
+  H_2(s)=\frac{2}{s+4}\xrightarrow{\ z\ }H_2(z)=\frac{2z}{z-\ee^{-4T}},
+\]
+\[
+  H(z)=H_1(z)H_2(z)=\frac{2z^{2}}{(z-\ee^{-2T})(z-\ee^{-4T})}
+\]
+\[
+  \Rightarrow\ H(z)=\frac{2}{\ee^{-2T}-\ee^{-4T}}\left(\frac{\ee^{-2T}z}{z-\ee^{-2T}}-\frac{\ee^{-4T}z}{z-\ee^{-4T}}\right).
+\]
+Inverse $z$ transform:
+\[
+  h(kT)=\frac{2}{\ee^{-2T}-\ee^{-4T}}\Bigl[\ee^{-2T}\ee^{-2kT}-\ee^{-4T}\ee^{-4kT}\Bigr],\qquad k\ge0.
+\]
+\end{example}
+
+The two answers have the same poles ($\ee^{-2T}$ and $\ee^{-4T}$) but different numerators: the first has
+a single zero at $z=0$ and the second a double zero at $z=0$.
+
+\addedsection[Added problem: the sampler position matters]
+\begin{problem}
+For $H_1(s)=\dfrac{1}{s+1}$, $H_2(s)=\dfrac{1}{s+2}$ and $T=0.5\,\mathrm{s}$ find the two overall transfer
+functions (no sampler between the blocks, and a sampler between the blocks), and compare their first four
+samples of the impulse response.
+\end{problem}
+\begin{solution}
+With $a=\ee^{-0.5}=0.6065$ and $b=\ee^{-1}=0.3679$ the denominator is common:
+$(z-a)(z-b)=z^{2}-0.9744\,z+0.2231$.\par
+\emph{No sampler between the blocks:} $H_1H_2=\dfrac{1}{s+1}-\dfrac{1}{s+2}$, so
+$H(z)=\dfrac{(a-b)\,z}{(z-a)(z-b)}=\dfrac{0.2387\,z}{z^{2}-0.9744z+0.2231}$ and
+$h(kT)=\ee^{-0.5k}-\ee^{-k}=0,\;0.2387,\;0.2325,\;0.1733$.\par
+\emph{Sampler between the blocks:} $H(z)=\dfrac{z}{z-a}\cdot\dfrac{z}{z-b}=\dfrac{z^{2}}{z^{2}-0.9744z+0.2231}$ and
+$h(kT)=1,\;0.9744,\;0.7263,\;0.4903$ (the discrete convolution of $\ee^{-0.5k}$ and $\ee^{-k}$).
+The two transfer functions differ even though the analog blocks are identical.
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{The closed-loop transfer function}\scanref{p.\,38}
+For the loop of Fig.~\ref{fig:closedloop} (controller $C(z)$, then DAC (ZOH), analog subsystem and ADC
+(ideal sampler), which together are $\GZAS(z)$):
+
+\begin{figure}[ht]
+\centering
+\resizebox{\linewidth}{!}{\figClosedLoopExpanded}
+\caption{Closed-loop digital control system; the box $\GZAS(z)$ contains the ZOH, the analog
+subsystem and the ideal sampler.}\label{fig:closedloop}
+\end{figure}
+
+\begin{equation}
+  G_{cl}(z)=\frac{Y(z)}{R(z)}=\frac{C(z)\,\GZAS(z)}{1+C(z)\,\GZAS(z)},
+  \qquad\text{characteristic equation: }\ 1+C(z)\,\GZAS(z)=0.
+\end{equation}
+The roots of the characteristic equation are the closed-loop system poles, which can be selected for the
+desired time-response specifications as in $s$-domain design.
+
+\addedsection[Added problem: closed loop with the cruise-control plant]
+\begin{problem}
+Use $\GZAS(z)=\dfrac{0.000975}{z-0.9512}$ from the cruise-control problem ($T=1\,\mathrm{s}$) with
+$C(z)=K_c$. (a) Find the closed-loop pole as a function of $K_c$ and the range of $K_c$ that gives a
+stable loop. (b) Choose $K_c$ to put the pole at $z=0.5$ and compute $G_{cl}(1)$.
+\end{problem}
+\begin{solution}
+(a) $1+K_c\GZAS(z)=0\Rightarrow z=0.9512-0.000975\,K_c$. Stability requires $|z|<1$, i.e.\
+$-1<0.9512-0.000975K_c<1$, which gives $0<K_c<(1+0.9512)/0.000975\approx2000$.\par
+(b) $0.9512-0.000975K_c=0.5\Rightarrow K_c=462.6$. With $K=0.02$,
+$G_{cl}(1)=\dfrac{K_cK}{1+K_cK}=\dfrac{9.252}{10.252}=0.902$: the closed-loop DC gain is below one (a
+proportional controller leaves a steady-state error of $9.8\%$ for a step command; this is the topic of the
+next chapter).
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsection{Example: sampled feedback with an analog loop}\scanref{p.\,39}
+\begin{example}
+Find the Laplace transform of the analog output $Y(s)$ and of the sampled output $Y^{*}(s)$ for the
+block diagram of Fig.~\ref{fig:sampledfb}.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\linewidth}{!}{\figSampledFeedback}
+\caption{Analog loop with the feedback signal sampled.}\label{fig:sampledfb}
+\end{figure}
+
+\noindent From the diagram,
+\[
+  X(s)=H(s)Y(s),\qquad E(s)=R(s)-X^{*}(s),\qquad Y(s)=G(s)D(s)E(s),
+\]
+so that
+\[
+  X(s)=H(s)G(s)D(s)\bigl[R(s)-X^{*}(s)\bigr]=H(s)G(s)D(s)R(s)-H(s)G(s)D(s)X^{*}(s).
+\]
+The impulse-sampled signal $x^{*}(t)$ has the Laplace form
+\[
+  X^{*}(s)=(HGDR)^{*}(s)-(HGD)^{*}(s)X^{*}(s)\quad\longrightarrow\quad X^{*}(s)=\frac{(HGDR)^{*}(s)}{1+(HGD)^{*}(s)}.
+\]
+Hence
+\[
+  E(s)=R(s)-\frac{(HGDR)^{*}(s)}{1+(HGD)^{*}(s)},\qquad
+  Y(s)=G(s)D(s)\left[R(s)-\frac{(HGDR)^{*}(s)}{1+(HGD)^{*}(s)}\right].
+\]
+The sampled output is
+\[
+  Y^{*}(s)=(GDR)^{*}(s)-(GD)^{*}(s)\,\frac{(HGDR)^{*}(s)}{1+(HGD)^{*}(s)}.
+\]
+With the transformation $z=\ee^{sT}$ the sampled output in the $z$ domain is
+\[
+  Y(z)=(GDR)(z)-(GD)(z)\,\frac{(HGDR)(z)}{1+(HGD)(z)}.
+\]
+\end{example}
+\begin{itemize}
+  \item This shows that for some digital systems no expression is available for the transfer function
+        excluding the input $R$ (the input stays inside the $z$ transforms and cannot be factored out).
+  \item However, we do have the characteristic equation $1+(HGD)(z)=0$ with which to design a control
+        system, as in the cases where a closed-loop transfer function is defined.
+\end{itemize}
+
+%------------------------------------------------------------------------------
+\subsection{Analog disturbances in a digital system}\scanref{pp.\,40--41}
+\begin{itemize}
+  \item Disturbances are variables that are not included in the system model but affect its response.
+  \item Almost all disturbances are analog and are inputs to analog subsystems.
+\end{itemize}
+
+\begin{figure}[ht]
+\centering
+\resizebox{\linewidth}{!}{\figDisturbance}
+\caption{Digital control loop with an analog disturbance $D(s)$ entering through the disturbance model
+$G_d(s)$.}\label{fig:disturbance}
+\end{figure}
+
+From Fig.~\ref{fig:disturbance},
+\[
+  Y(s)=G(s)\bigl[G_d(s)D(s)+\GZOH(s)U^{*}(s)\bigr],\qquad U(s)=C^{*}(s)E(s),\qquad E(s)=R(s)-Y^{*}(s),
+\]
+so $U(s)=C^{*}(s)\bigl[R(s)-Y^{*}(s)\bigr]$. The system is linear, so the reference input can be treated
+separately and is assumed to be zero: $R(s)=0$. Then
+\[
+  U(s)=C^{*}(s)\bigl[0-Y^{*}(s)\bigr]=-C^{*}(s)Y^{*}(s)\ \longrightarrow\ U^{*}(s)=-C^{*}(s)Y^{*}(s),
+\]
+\[
+  Y(s)=G(s)\bigl[G_d(s)D(s)-\GZOH(s)C^{*}(s)Y^{*}(s)\bigr],
+\]
+\[
+  Y^{*}(s)=(GG_dD)^{*}(s)-(G\,\GZOH)^{*}(s)\,C^{*}(s)Y^{*}(s)
+  \ \Rightarrow\ Y^{*}(s)=\frac{(GG_dD)^{*}(s)}{1+\GZAS^{*}(s)\,C^{*}(s)},
+\]
+where $G\,\GZOH$ is the $\GZAS$ block. In the $z$ domain,
+\begin{equation}\label{eq:dist}
+  Y(z)=\frac{(GG_dD)(z)}{1+\GZAS(z)\,C(z)}.
+\end{equation}
+
+\begin{example}[Steady-state response to an impulse disturbance]
+Consider the block diagram of a digital system with an analog disturbance and
+\[
+  G(s)=\frac{K_p}{s+1},\qquad G_d(s)=\frac1s,\qquad C(z)=K_c,\qquad y(\infty)=\ ?
+\]
+Find the steady-state response of the system to an impulse disturbance of magnitude $A$. From
+Eq.~\eqref{eq:dist}, $Y(z)=\dfrac{(GG_dD)(z)}{1+\GZAS(z)C(z)}$ with $\GZAS(z)=(1-z^{-1})\ZT{G(s)/s}$.
+For the disturbance, $D(s)=A$ and
+\[
+  G(s)G_d(s)D(s)=\frac{K_pA}{s(s+1)}=K_pA\left(\frac1s-\frac{1}{s+1}\right),
+\]
+\[
+  (GG_dD)(z)=K_pA\left[\frac{z}{z-1}-\frac{z}{z-\ee^{-T}}\right].
+\]
+\[
+  \GZAS(z)=(1-z^{-1})\,K_p\left(\frac{z}{z-1}-\frac{z}{z-\ee^{-T}}\right)=K_p\,\frac{1-\ee^{-T}}{z-\ee^{-T}}.
+\]
+\[
+  Y(z)=\frac{K_pA\left[\dfrac{z}{z-1}-\dfrac{z}{z-\ee^{-T}}\right]}{1+K_cK_p\dfrac{1-\ee^{-T}}{z-\ee^{-T}}}.
+\]
+For all steady-state responses we use the final value theorem:
+\[
+  y(\infty)=\lim_{z\to1}\bigl[(1-z^{-1})Y(z)\bigr]=\boxed{\ \frac{K_pA}{1+K_cK_p}\ }
+\]
+\end{example}
+
+\begin{remark}[added]
+The final value theorem is valid only if the closed loop is stable. Here the closed-loop pole is
+$z=\ee^{-T}-K_cK_p(1-\ee^{-T})$, which lies inside the unit circle for
+$-1<\ee^{-T}-K_cK_p(1-\ee^{-T})<1$, i.e.\ for $K_cK_p<\dfrac{1+\ee^{-T}}{1-\ee^{-T}}$ (for $K_cK_p>0$).
+\end{remark}
+
+\addedsection[Added problem: numerical check of the disturbance example]
+\begin{problem}
+In the example above take $K_p=2$, $T=0.5\,\mathrm{s}$, $A=1$. Compute $y(\infty)$ for $K_c=0.25$, and
+discuss $K_c=3.5$.
+\end{problem}
+\begin{solution}
+For $K_c=0.25$: $K_cK_p=0.5$, $y(\infty)=\dfrac{2\cdot1}{1+0.5}=1.333$. The closed-loop pole is
+$\ee^{-0.5}-0.5(1-\ee^{-0.5})=0.6065-0.1967=0.410$, inside the unit circle, so the formula applies (a
+simulation of the loop converges to $1.3333$).\par
+For $K_c=3.5$: $K_cK_p=7$ and the pole is $0.6065-7\cdot0.3935=-2.148$, outside the unit circle, so the
+loop is unstable and $y(k)$ diverges although the formula would still produce the number
+$\dfrac{2}{1+7}=0.25$. The limit $K_cK_p<\dfrac{1+\ee^{-0.5}}{1-\ee^{-0.5}}=4.08$ is violated.
+\end{solution}

@@ -1,0 +1,703 @@
+\section{The $z$ Transform}\label{sec:ztransform}
+\lecdate{30 September and 7 October 2019}
+
+\subsection{Introduction}\scanref{p.\,7}
+\begin{itemize}
+  \item A mathematical tool commonly used for the analysis and synthesis of discrete-time control systems is
+        the \emph{$z$ transform}.
+  \item The Laplace ($s$) transform in continuous-time systems $\equiv$ the $z$ transform in discrete-time
+        systems.
+  \item A linear time-invariant (LTI) differential equation $\xrightarrow{\ \text{Laplace}\ }$ algebraic
+        equations in $s$.
+  \item An LTI difference equation $\xrightarrow{\ z\ \text{transform}\ }$ algebraic equation in $z$.
+\end{itemize}
+
+\paragraph{Discrete-time signals.} Sampling a continuous-time signal $x(t)$ gives the sampled signals
+$x(0),x(T),x(2T),\dots,x(kT)$.
+\begin{itemize}
+  \item $x(t)$: continuous-time signal,
+  \item $x(kT)$: sampled signal, $T$ is the sampling period,
+  \item $x(k)$: number sequence (when $T=1\,\mathrm{s}$).
+\end{itemize}
+
+The $z$ transform of a time function $x(t)$, where $t\ge0$, or of a sequence of values $x(kT)$, where $k$
+takes zero or positive integers, is
+\begin{equation}
+  X(z)=\ZT{x(t)}=\ZT{x(kT)}=\sum_{k=0}^{\infty}x(kT)\,z^{-k}\qquad(z\ \text{transform}),
+\end{equation}
+\begin{equation}
+  X(s)=\LT{x(t)}=\int_0^{\infty}\ee^{-st}x(t)\,\dd t\qquad(\text{Laplace transform}).
+\end{equation}
+Written out,
+\[
+  X(z)=x(0)+x(T)z^{-1}+x(2T)z^{-2}+\cdots+x(kT)z^{-k}+\cdots
+\]
+The power $z^{-k}$ in this series indicates the position in time at which the amplitude $x(kT)$ occurs.
+
+%------------------------------------------------------------------------------
+\subsection{$z$ transforms of elementary functions}\scanref{pp.\,8--10}
+
+\subsubsection*{Unit-step function}
+\[
+  x(t)=\begin{cases}1(t),&t\ge0\\0,&t<0\end{cases}
+\]
+\begin{equation}
+  X(z)=\ZT{1(t)}=\sum_{k=0}^{\infty}1\cdot z^{-k}=1+z^{-1}+z^{-2}+\cdots\ \text{(geometric series)}
+  =\frac{1}{1-z^{-1}}=\frac{z}{z-1}.
+\end{equation}
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[width=0.46\linewidth,height=3.6cm,axis lines=left,xlabel={$t$},ylabel={$x(t)$},
+      xmin=-0.2,xmax=5.3,ymin=0,ymax=1.5,xtick=\empty,ytick={1},clip=false]
+    \addplot[itublue,very thick,domain=0:5,samples=2]{1};
+    \draw[itublue,very thick] (axis cs:0,0) -- (axis cs:0,1);
+  \end{axis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}
+  \begin{axis}[width=0.50\linewidth,height=3.6cm,axis lines=left,xlabel={$t$},ylabel={$x(t)$},
+      xmin=-0.2,xmax=5.4,ymin=0,ymax=1.5,xtick={0,1,2,3,4},
+      xticklabels={0,$T$,$2T$,$3T$,$4T$},ytick={1},clip=false]
+    \addplot[ycomb,itublue,thick,mark=*,mark size=1.3pt,samples at={0,1,2,3,4}]{1};
+    \addplot[gray,dashed,domain=0:5,samples=2]{1};
+    \node[font=\scriptsize,above] at (axis cs:1,1.02){$x(T)$};
+    \node[font=\scriptsize,above] at (axis cs:2,1.02){$x(2T)$};
+    \node[font=\scriptsize,above] at (axis cs:3,1.02){$x(3T)$};
+    \node[font=\scriptsize,above] at (axis cs:4,1.02){$x(4T)$};
+  \end{axis}
+\end{tikzpicture}
+\end{center}
+
+\subsubsection*{Unit-ramp function}
+\[
+  x(t)=\begin{cases}t,&t\ge0\\0,&t<0\end{cases}\qquad x(kT)=kT,\quad k=0,1,2,\dots
+\]
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[width=0.46\linewidth,height=3.6cm,axis lines=left,xlabel={$t$},ylabel={$x(t)$},
+      xmin=0,xmax=4.8,ymin=0,ymax=4.8,xtick=\empty,ytick=\empty,clip=false]
+    \addplot[itublue,very thick,domain=0:4.5,samples=2]{x};
+  \end{axis}
+\end{tikzpicture}\hfill
+\begin{tikzpicture}
+  \begin{axis}[width=0.50\linewidth,height=3.6cm,axis lines=left,xlabel={$t$},ylabel={$x(t)$},
+      xmin=0,xmax=4.8,ymin=0,ymax=4.8,xtick={0,1,2,3,4},xticklabels={0,$T$,$2T$,$3T$,$4T$},
+      ytick=\empty,clip=false]
+    \addplot[ycomb,itublue,thick,mark=*,mark size=1.3pt,samples at={0,1,2,3,4}]{x};
+  \end{axis}
+\end{tikzpicture}
+\end{center}
+
+\begin{equation}
+  X(z)=\ZT{t}=\ZT{kT}=\sum_{k=0}^{\infty}kT\,z^{-k}=T\bigl(z^{-1}+2z^{-2}+3z^{-3}+\cdots\bigr)
+  =T\,\frac{z^{-1}}{(1-z^{-1})^{2}}=\frac{Tz}{(z-1)^{2}}.
+\end{equation}
+
+\paragraph{Proof.} Write
+\begin{align}
+  X(z)&=Tz^{-1}+2Tz^{-2}+3Tz^{-3}+\cdots \tag{1}\\
+  \intertext{multiply both sides by $z^{-1}$:}
+  z^{-1}X(z)&=Tz^{-2}+2Tz^{-3}+3Tz^{-4}+\cdots \tag{2}\\
+  \intertext{subtract (2) from (1):}
+  X(z)-z^{-1}X(z)&=Tz^{-1}+Tz^{-2}+Tz^{-3}+\cdots \tag{3}\\
+  \intertext{multiply (3) by $z^{-1}$:}
+  (z^{-1}-z^{-2})X(z)&=Tz^{-2}+Tz^{-3}+Tz^{-4}+\cdots \tag{4}
+\end{align}
+Subtracting (4) from (3) gives $(1-2z^{-1}+z^{-2})X(z)=Tz^{-1}$, hence
+\[
+  X(z)=\frac{Tz^{-1}}{1-2z^{-1}+z^{-2}}=\frac{Tz}{(z-1)^{2}}.
+\]
+
+\subsubsection*{Polynomial (geometric) function $a^{k}$}
+\[
+  x(k)=\begin{cases}a^{k},&k=0,1,2,\dots\\0,&k<0\end{cases}\quad(a\ \text{is a constant}),
+\]
+\begin{equation}
+  X(z)=\ZT{a^{k}}=\sum_{k=0}^{\infty}a^{k}z^{-k}=1+az^{-1}+a^{2}z^{-2}+\cdots=\frac{1}{1-az^{-1}}=\frac{z}{z-a}.
+\end{equation}
+
+\subsubsection*{Exponential function $\ee^{-at}$}
+\[
+  x(t)=\begin{cases}\ee^{-at},&t\ge0\\0,&t<0\end{cases}\qquad x(kT)=\ee^{-akT},
+\]
+\begin{equation}
+  \ZT{\ee^{-akT}}=\sum_{k=0}^{\infty}\ee^{-akT}z^{-k}=1+\ee^{-aT}z^{-1}+\ee^{-2aT}z^{-2}+\cdots
+  =\frac{1}{1-\ee^{-aT}z^{-1}}=\frac{z}{z-\ee^{-aT}}.
+\end{equation}
+This is the case $a\to\ee^{-aT}$ of the geometric function.
+
+\subsubsection*{Sinusoidal function}
+\[
+  x(t)=\begin{cases}\sin(\omega t),&t\ge0\\0,&t<0\end{cases}
+\]
+From Euler's formula, $\ee^{\jj\omega t}=\cos\omega t+\jj\sin\omega t$ and
+$\ee^{-\jj\omega t}=\cos\omega t-\jj\sin\omega t$, so $\sin\omega t=\tfrac{1}{2\jj}\bigl[\ee^{\jj\omega t}-\ee^{-\jj\omega t}\bigr]$.
+Using $\ZT{\ee^{-at}}=1/(1-\ee^{-aT}z^{-1})$,
+\begin{align}
+  X(z)=\ZT{\sin\omega t}
+  &=\frac{1}{2\jj}\left(\frac{1}{1-\ee^{\jj\omega T}z^{-1}}-\frac{1}{1-\ee^{-\jj\omega T}z^{-1}}\right)
+   =\frac{1}{2\jj}\,\frac{\bigl(\ee^{\jj\omega T}-\ee^{-\jj\omega T}\bigr)z^{-1}}
+        {1-\bigl(\ee^{\jj\omega T}+\ee^{-\jj\omega T}\bigr)z^{-1}+z^{-2}}\notag\\
+  &=\frac{\sin(\omega T)\,z^{-1}}{1-2\cos(\omega T)\,z^{-1}+z^{-2}}
+   =\frac{z\,\sin(\omega T)}{z^{2}-2z\cos(\omega T)+1}.
+\end{align}
+
+\begin{boardnote}
+On the board the sampled sinusoid is written with $\omega t$ in the final line
+($z\sin(\omega t)/(z^{2}-2z\cos(\omega t)+1)$). After sampling the argument is $\omega T$, which is what
+is typeset here.
+\end{boardnote}
+
+\begin{bexercise}
+Find the $z$ transform of (a) $x(t)=at$ and (b) $x(t)=\cos(\omega t)$.
+\end{bexercise}
+\begin{addsol}
+(a) By linearity and the ramp result, $\ZT{at}=a\,\dfrac{Tz}{(z-1)^{2}}$.
+
+(b) Add the two Euler exponentials instead of subtracting them: $\cos\omega t=\tfrac12[\ee^{\jj\omega t}+\ee^{-\jj\omega t}]$,
+\begin{align*}
+  \ZT{\cos\omega t}&=\frac12\left(\frac{1}{1-\ee^{\jj\omega T}z^{-1}}+\frac{1}{1-\ee^{-\jj\omega T}z^{-1}}\right)\\
+  &=\frac{1-\cos(\omega T)\,z^{-1}}{1-2\cos(\omega T)\,z^{-1}+z^{-2}}
+  =\frac{z\,[z-\cos(\omega T)]}{z^{2}-2z\cos(\omega T)+1}.
+\end{align*}
+\end{addsol}
+
+\begin{example}
+Obtain the $z$ transform of $X(s)=\dfrac{1}{s(s+1)}$.
+
+Partial fractions: $\dfrac{1}{s(s+1)}=\dfrac{A}{s}+\dfrac{B}{s+1}$ with $A=1,\ B=-1$, so
+$\dfrac{1}{s}-\dfrac{1}{s+1}$ and $x(t)=1-\ee^{-t}$, $t\ge0$. Then
+\[
+  \ZT{1-\ee^{-t}}=\frac{1}{1-z^{-1}}-\frac{1}{1-\ee^{-T}z^{-1}}
+  =\frac{(1-\ee^{-T})z^{-1}}{(1-z^{-1})(1-\ee^{-T}z^{-1})}
+  =\frac{(1-\ee^{-T})\,z}{(z-1)(z-\ee^{-T})}.
+\]
+\end{example}
+
+%------------------------------------------------------------------------------
+\subsection{Table of common $z$ transforms}
+The transforms derived above, together with the ones that follow from the theorems of the next section, are
+collected here. They agree with the tables of Ogata (Table 2-1) and Fadali (Appendix~I). Here $T$ is the
+sampling period and $k=0,1,2,\dots$
+
+\begin{center}\renewcommand{\arraystretch}{2.3}
+\begin{tabular}{@{}clll@{}}\toprule
+ & $X(s)$ & $x(t)$ or $x(kT)$ & $X(z)$ \\ \midrule
+1 & --- & unit impulse $\delta_0(k)$ & $1$ \\
+2 & --- & $\delta_0(k-n)$ & $z^{-n}$ \\
+3 & $\dfrac1s$ & $1(t)$ & $\dfrac{z}{z-1}$ \\
+4 & $\dfrac{1}{s+a}$ & $\ee^{-at}$ & $\dfrac{z}{z-\ee^{-aT}}$ \\
+5 & $\dfrac{1}{s^{2}}$ & $t$ & $\dfrac{Tz}{(z-1)^{2}}$ \\
+6 & $\dfrac{2}{s^{3}}$ & $t^{2}$ & $\dfrac{T^{2}z(z+1)}{(z-1)^{3}}$ \\
+7 & $\dfrac{a}{s(s+a)}$ & $1-\ee^{-at}$ & $\dfrac{(1-\ee^{-aT})z}{(z-1)(z-\ee^{-aT})}$ \\
+8 & $\dfrac{b-a}{(s+a)(s+b)}$ & $\ee^{-at}-\ee^{-bt}$ & $\dfrac{(\ee^{-aT}-\ee^{-bT})z}{(z-\ee^{-aT})(z-\ee^{-bT})}$ \\
+9 & $\dfrac{1}{(s+a)^{2}}$ & $t\,\ee^{-at}$ & $\dfrac{T\ee^{-aT}z}{(z-\ee^{-aT})^{2}}$ \\
+10 & $\dfrac{\omega}{s^{2}+\omega^{2}}$ & $\sin\omega t$ & $\dfrac{z\sin\omega T}{z^{2}-2z\cos\omega T+1}$ \\
+11 & $\dfrac{s}{s^{2}+\omega^{2}}$ & $\cos\omega t$ & $\dfrac{z(z-\cos\omega T)}{z^{2}-2z\cos\omega T+1}$ \\
+12 & $\dfrac{\omega}{(s+a)^{2}+\omega^{2}}$ & $\ee^{-at}\sin\omega t$ & $\dfrac{\ee^{-aT}z\sin\omega T}{z^{2}-2\ee^{-aT}z\cos\omega T+\ee^{-2aT}}$ \\
+13 & $\dfrac{s+a}{(s+a)^{2}+\omega^{2}}$ & $\ee^{-at}\cos\omega t$ & $\dfrac{z(z-\ee^{-aT}\cos\omega T)}{z^{2}-2\ee^{-aT}z\cos\omega T+\ee^{-2aT}}$ \\
+14 & --- & $a^{k}$ & $\dfrac{z}{z-a}$ \\
+15 & --- & $k\,a^{k}$ & $\dfrac{az}{(z-a)^{2}}$ \\ \bottomrule
+\end{tabular}
+\end{center}
+
+%------------------------------------------------------------------------------
+\subsection{Important properties and theorems of the $z$ transform}\scanref{pp.\,11--15}
+
+\subsubsection*{Multiplication by a constant}
+\[
+  \ZT{a\,x(t)}=a\,\ZT{x(t)}=aX(z).
+\]
+\emph{Proof.} $\ZT{a\,x(t)}=\sum_{k=0}^{\infty}a\,x(kT)z^{-k}=a\sum_{k=0}^{\infty}x(kT)z^{-k}=aX(z)$.
+
+\subsubsection*{Linearity}
+If $x(t)=\alpha f(t)+\beta g(t)$ then $X(z)=\alpha F(z)+\beta G(z)$.
+
+\emph{Proof.} $\ZT{\alpha f(t)+\beta g(t)}=\alpha\sum f(k)z^{-k}+\beta\sum g(k)z^{-k}=\alpha F(z)+\beta G(z)$.
+
+\subsubsection*{Multiplication by $a^{k}$}
+\[
+  \ZT{a^{k}x(k)}=\sum_{k=0}^{\infty}a^{k}x(k)z^{-k}=\sum_{k=0}^{\infty}x(k)\,(a^{-1}z)^{-k}=X(a^{-1}z).
+\]
+
+\subsubsection*{Shifting (real translation) theorem}
+\begin{align}
+  \ZT{x(t-nT)}&=z^{-n}X(z) && \text{time delay (right shift)}\\
+  \ZT{x(t+nT)}&=z^{n}\Bigl[X(z)-\sum_{k=0}^{n-1}x(kT)z^{-k}\Bigr] && \text{time advance (left shift)}
+\end{align}
+
+\paragraph{Proof for the right shift (time delay).}
+\[
+  \ZT{x(t-nT)}=\sum_{k=0}^{\infty}x(kT-nT)z^{-k}=z^{-n}\sum_{k=0}^{\infty}x(kT-nT)z^{-(k-n)} .
+\]
+Define $m=k-n$:
+\[
+  =z^{-n}\sum_{m=-n}^{\infty}x(mT)z^{-m}\ \overset{x(mT)=0,\ m<0}{=}\ z^{-n}\sum_{m=0}^{\infty}x(mT)z^{-m}=z^{-n}X(z).
+\]
+
+\begin{bexercise}
+Prove the left-shift theorem.
+\end{bexercise}
+\begin{addsol}
+\[
+  \ZT{x(t+nT)}=\sum_{k=0}^{\infty}x(kT+nT)z^{-k}=z^{n}\sum_{k=0}^{\infty}x\bigl((k+n)T\bigr)z^{-(k+n)}
+  =z^{n}\sum_{m=n}^{\infty}x(mT)z^{-m}.
+\]
+Since $\sum_{m=n}^{\infty}=\sum_{m=0}^{\infty}-\sum_{m=0}^{n-1}$,
+\[
+  \ZT{x(t+nT)}=z^{n}\Bigl[X(z)-\sum_{m=0}^{n-1}x(mT)z^{-m}\Bigr].\qquad\blacksquare
+\]
+\end{addsol}
+
+\begin{remark}
+Multiplication of $X(z)$ by $z$ has the effect of \emph{advancing} the signal $x(kT)$ by one step (one
+sampling period $T$); multiplication of $X(z)$ by $z^{-1}$ has the effect of \emph{delaying} the signal $x(kT)$
+by one step.
+\end{remark}
+
+\begin{example}
+Find the $z$ transform of the unit-step function delayed by one sampling period and by four sampling periods.
+With $\ZT{1(t)}=\dfrac{1}{1-z^{-1}}$,
+\[
+  \ZT{1(t-T)}=z^{-1}\frac{1}{1-z^{-1}}=\frac{1}{z-1},\qquad
+  \ZT{1(t-4T)}=z^{-4}\frac{1}{1-z^{-1}}=\frac{1}{z^{4}-z^{3}}.
+\]
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[width=0.7\linewidth,height=3.4cm,axis lines=left,xlabel={$t$},ylabel={$x(t)$},
+      xmin=0,xmax=6.6,ymin=0,ymax=1.5,xtick={1,2,3,4,5,6},xticklabels={$T$,$2T$,$3T$,$4T$,$5T$,$6T$},
+      ytick={1},clip=false]
+    \addplot[itublue,very thick,domain=1:6.3,samples=2]{1};
+    \draw[itublue,very thick] (axis cs:1,0) -- (axis cs:1,1);
+    \node[itublue,font=\scriptsize,above] at (axis cs:2.2,1.02){$1(t-T)$};
+    \addplot[dotted,thick,black,domain=4:6.3,samples=2]{0.5};
+    \draw[black,dotted,very thick] (axis cs:4,0) -- (axis cs:4,1);
+    \node[font=\scriptsize,above,xshift=2mm] at (axis cs:5.2,0.52){$1(t-4T)$};
+  \end{axis}
+\end{tikzpicture}
+\end{center}
+\end{example}
+
+\begin{example}
+Obtain the $z$ transform of $f(k)=a^{k-1}$, $k=1,2,3,\dots$ and $f(k)=0$ for $k\le0$.
+Since $\ZT{x(k-1)}=z^{-1}X(z)$ and $\ZT{a^{k}}=\dfrac{1}{1-az^{-1}}$,
+\[
+  \ZT{a^{k-1}}=z^{-1}\,\frac{1}{1-az^{-1}}.
+\]
+\end{example}
+
+\begin{example}
+Let $y(k)=\sum_{h=0}^{k}x(h)$ with $y(k)=0$ for $k<0$. Obtain $\ZT{y(k)}$.
+\begin{align*}
+  y(k)&=x(0)+x(1)+x(2)+\cdots+x(k-1)+x(k)\\
+  y(k-1)&=x(0)+x(1)+x(2)+\cdots+x(k-1)\\
+  \Rightarrow\ y(k)-y(k-1)&=x(k).
+\end{align*}
+Taking the $z$ transform, $Y(z)-z^{-1}Y(z)=X(z)$, so
+\[
+  Y(z)=\frac{1}{1-z^{-1}}\,X(z).
+\]
+(A running sum acts as a discrete integrator.)
+\end{example}
+
+\subsubsection*{Complex translation theorem}
+\[
+  \ZT{\ee^{-at}x(t)}=X(z\,\ee^{aT}).
+\]
+\emph{Proof.} $\ZT{\ee^{-at}x(t)}=\sum_{k=0}^{\infty}x(kT)\ee^{-akT}z^{-k}=\sum_{k=0}^{\infty}x(kT)(\ee^{aT}z)^{-k}=X(\ee^{aT}z)$.
+
+\begin{example}
+Obtain the $z$ transform of $\ee^{-at}\sin\omega t$. Start from
+$\ZT{\sin\omega t}=\dfrac{z^{-1}\sin\omega T}{1-2z^{-1}\cos\omega T+z^{-2}}$ and replace $z\to z\ee^{aT}$:
+\[
+  \ZT{\ee^{-at}\sin\omega t}=\frac{(z\ee^{aT})^{-1}\sin\omega T}{1-2(z\ee^{aT})^{-1}\cos\omega T+(z\ee^{aT})^{-2}}
+  =\frac{z^{-1}\ee^{-aT}\sin\omega T}{1-2z^{-1}\ee^{-aT}\cos\omega T+z^{-2}\ee^{-2aT}}.
+\]
+\end{example}
+
+\begin{bexercise}
+Find $\ZT{\ee^{-at}\cos\omega t}$.
+\end{bexercise}
+\begin{addsol}
+Start from $\ZT{\cos\omega t}=\dfrac{1-z^{-1}\cos\omega T}{1-2z^{-1}\cos\omega T+z^{-2}}$ and replace $z\to z\ee^{aT}$:
+\[
+  \ZT{\ee^{-at}\cos\omega t}=\frac{1-z^{-1}\ee^{-aT}\cos\omega T}{1-2z^{-1}\ee^{-aT}\cos\omega T+z^{-2}\ee^{-2aT}}
+  =\frac{z\,[z-\ee^{-aT}\cos\omega T]}{z^{2}-2z\ee^{-aT}\cos\omega T+\ee^{-2aT}}.
+\]
+\end{addsol}
+
+\begin{example}
+Obtain the $z$ transform of $t\,\ee^{-at}$. From $\ZT{t}=\dfrac{Tz^{-1}}{(1-z^{-1})^{2}}$ and $z\to z\ee^{aT}$:
+\[
+  \ZT{t\,\ee^{-at}}=\frac{T\,z^{-1}\ee^{-aT}}{(1-z^{-1}\ee^{-aT})^{2}}.
+\]
+\end{example}
+
+\subsubsection*{Initial value theorem}
+In the Laplace domain $f(0)=\lim_{s\to\infty}sF(s)$. In the $z$ domain
+\begin{equation}
+  \boxed{\,x(0)=\lim_{z\to\infty}X(z)\,}
+\end{equation}
+\emph{Proof.} $X(z)=\sum_{k=0}^{\infty}x(k)z^{-k}=x(0)+x(1)z^{-1}+x(2)z^{-2}+\cdots$; letting $z\to\infty$ every
+term except $x(0)$ vanishes.
+
+\subsubsection*{Final value theorem}
+In the Laplace domain $\lim_{t\to\infty}f(t)=f(\infty)=\lim_{s\to0}sF(s)$. In the $z$ domain
+\begin{equation}
+  \lim_{k\to\infty}x(k)=x(\infty)=\lim_{z\to1}\bigl[(1-z^{-1})X(z)\bigr].
+\end{equation}
+\emph{Proof.} With $\ZT{x(k)}=X(z)=\sum_{k=0}^{\infty}x(k)z^{-k}$ (1) and
+$\ZT{x(k-1)}=z^{-1}X(z)=\sum_{k=0}^{\infty}x(k-1)z^{-k}$ (2), subtracting (2) from (1) gives
+\[
+  (1-z^{-1})X(z)=\sum_{k=0}^{\infty}x(k)z^{-k}-\sum_{k=0}^{\infty}x(k-1)z^{-k}.
+\]
+Letting $z\to1$ and using $x(k)=0$ for $k<0$,
+\[
+  \lim_{z\to1}(1-z^{-1})X(z)=\sum_{k=0}^{\infty}[x(k)-x(k-1)]
+  =\bigl(x(0)-\underbrace{x(-1)}_{0}\bigr)+\bigl(x(1)-x(0)\bigr)+\bigl(x(2)-x(1)\bigr)+\cdots=x(\infty).
+\]
+
+\begin{example}
+Determine the final value $x(\infty)$ of $X(z)=\dfrac{1}{1-z^{-1}}-\dfrac{1}{1-\ee^{-aT}z^{-1}}$.
+\[
+  x(\infty)=\lim_{z\to1}\Bigl[(1-z^{-1})X(z)\Bigr]
+  =\lim_{z\to1}\Bigl[1-\underbrace{\frac{1-z^{-1}}{1-\ee^{-aT}z^{-1}}}_{\to\,0}\Bigr]=1.
+\]
+\end{example}
+
+\begin{remark}
+The final value theorem may be used only if $(1-z^{-1})X(z)$ has no poles on or outside the unit circle;
+otherwise the limit of $x(k)$ does not exist and the theorem gives a meaningless number.
+\end{remark}
+
+\addedsection
+\begin{problem}[Ramp-weighted exponential]
+Find $\ZT{k\,a^{k}}$ and use it to verify table entry 15, then find $\ZT{k\,(0.5)^{k}}$.
+\end{problem}
+\begin{solution}
+Use $\ZT{a^{k}}=\dfrac{z}{z-a}$. Differentiating $\sum a^{k}z^{-k}$ with respect to $a$ gives
+$\sum k\,a^{k-1}z^{-k}$, hence $\sum k\,a^{k}z^{-k}=a\,\dfrac{\partial}{\partial a}\dfrac{z}{z-a}=\dfrac{az}{(z-a)^{2}}$.
+For $a=0.5$: $\ZT{k(0.5)^{k}}=\dfrac{0.5z}{(z-0.5)^{2}}$.
+\end{solution}
+
+\begin{problem}[Initial and final value]
+For $X(z)=\dfrac{0.4\,z}{(z-1)(z-0.6)}$, find $x(0)$ and $x(\infty)$, and confirm with the first four samples.
+\end{problem}
+\begin{solution}
+Initial value: $x(0)=\lim_{z\to\infty}X(z)=0$. Final value: $x(\infty)=\lim_{z\to1}\dfrac{z-1}{z}X(z)=\dfrac{0.4}{1-0.6}=1$,
+valid since the only pole outside $z=1$ is $0.6$, inside the unit circle. Long division gives
+$X(z)=0.4z^{-1}+0.64z^{-2}+0.784z^{-3}+0.8704z^{-4}+\cdots$, so $x(k)=0,\,0.4,\,0.64,\,0.784,\,0.8704,\dots$
+which indeed tends to $1$ (the closed form is $x(k)=1-0.6^{k}$).
+\end{solution}
+
+\begin{problem}[Complex translation]
+Find $\ZT{\ee^{-2t}\cos(3t)}$ for $T=0.1\,\mathrm{s}$.
+\end{problem}
+\begin{solution}
+$\ee^{-aT}=\ee^{-0.2}=0.8187$, $\cos(\omega T)=\cos0.3=0.9553$:
+\[
+  X(z)=\frac{z\,(z-0.8187\cdot0.9553)}{z^{2}-2\cdot0.8187\cdot0.9553\,z+0.8187^{2}}=\frac{z\,(z-0.7821)}{z^{2}-1.5643z+0.6703}.
+\]
+\end{solution}
+
+%==============================================================================
+\subsection{The inverse $z$ transform}\scanref{pp.\,16--22}
+\begin{center}
+$X(z)\ \xrightarrow{\ \mathcal{Z}^{-1}\ }\ x(k)\ \text{or}\ x(kT)$.
+\end{center}
+The inverse $z$ transform of $X(z)$ yields a \emph{unique} $x(k)$, but it does \emph{not} yield a unique
+$x(t)$: every continuous signal that passes through the same sample values has the same $X(z)$.
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[width=0.8\linewidth,height=4.6cm,axis lines=left,xlabel={$t$},ylabel={$x(t)$},
+      xmin=0,xmax=5.2,ymin=-0.2,ymax=1.9,xtick={1,2,3,4},xticklabels={$T$,$2T$,$3T$,$4T$},ytick=\empty,clip=false]
+    \addplot[itublue,thick,domain=0:5,samples=300,smooth]{0.62+0.55*sin(deg(2*pi*x))};
+    \addplot[gray,thick,domain=0.2:5,samples=2]{0.62};
+    \addplot[ycomb,gray,dashed,mark=*,mark size=1.4pt,samples at={1,2,3,4}]{0.62};
+  \end{axis}
+\end{tikzpicture}\\[2pt]
+{\small Two different continuous signals (a constant and a sinusoid of period $T$) share the same samples
+$x(kT)$, hence the same $X(z)$.}
+\end{center}
+
+\subsubsection{Direct division (long division) method}
+This method is useful when it is difficult to obtain a closed-form expression for the inverse $z$
+transform, or when it is desired to find only the first several terms of $x(k)$.
+
+\paragraph{Procedure.}
+\begin{enumerate}
+  \item Write $X(z)=\mathrm{num}/\mathrm{den}$ with both polynomials in \emph{increasing powers of $z^{-1}$}.
+  \item Apply the num/den division.
+  \item Obtain $X(z)$ in the form of increasing powers of $z^{-1}$.
+  \item Compare with $X(z)=x(0)+x(1)z^{-1}+x(2)z^{-2}+\cdots$ and write $x(0),x(1),x(2),\dots$
+\end{enumerate}
+
+\begin{example}
+$X(z)=\dfrac{1}{z+1}$; find $x(k)$ for $k=0,1,2,3,4$.
+\[
+  X(z)=\frac{z^{-1}}{1+z^{-1}}=z^{-1}-z^{-2}+z^{-3}-z^{-4}+\cdots
+\]
+\[
+  \Rightarrow\quad x(0)=0,\ x(1)=1,\ x(2)=-1,\ x(3)=1,\ x(4)=-1.
+\]
+\end{example}
+
+\begin{example}
+$X(z)=\dfrac{10z+5}{(z-1)(z-0.2)}$; find $x(k)$ for $k=0,\dots,4$. Multiply numerator and denominator by $z^{-2}$:
+\[
+  X(z)=\frac{10z^{-1}+5z^{-2}}{1-1.2z^{-1}+0.2z^{-2}}=10z^{-1}+17z^{-2}+18.4z^{-3}+18.68z^{-4}+\cdots
+\]
+\[
+  \Rightarrow\quad x(0)=0,\ x(1)=10,\ x(2)=17,\ x(3)=18.4,\ x(4)=18.68.
+\]
+\end{example}
+
+\addedsection[Long division: additional problems]
+\begin{problem}
+Find the first five samples of $X(z)=\dfrac{z}{z^{2}-1.5z+0.5}$.
+\end{problem}
+\begin{solution}
+$X(z)=\dfrac{z^{-1}}{1-1.5z^{-1}+0.5z^{-2}}=z^{-1}+1.5z^{-2}+1.75z^{-3}+1.875z^{-4}+\cdots$, so
+$x(k)=0,\,1,\,1.5,\,1.75,\,1.875$. (The closed form is $x(k)=2(1-0.5^{k})$, which tends to $2$.)
+\end{solution}
+
+%------------------------------------------------------------------------------
+\subsubsection{Partial fraction expansion}
+\paragraph{Procedure.}
+\begin{enumerate}
+  \item Find the partial-fraction expansion of $X(z)/z$ (most $z$-functions have the term $z$ in their
+        numerator, so it is often convenient to use $X(z)/z$).
+  \item Obtain the inverse transform $x(k)$ using the $z$-transform tables.
+\end{enumerate}
+
+\paragraph{Poles and zeros in the $z$ plane.}
+\[
+  X(z)=\frac{b_0z^{m}+b_1z^{m-1}+\cdots+b_m}{z^{n}+a_1z^{n-1}+\cdots+a_n},\ m\le n
+  =\frac{b_0(z-z_1)(z-z_2)\cdots(z-z_m)}{(z-p_1)(z-p_2)\cdots(z-p_n)},
+\]
+where the $p_i$ ($i=1,2,\dots,n$) are the poles and the $z_j$ ($j=1,2,\dots,m$) are the zeros.
+
+\paragraph{Case 1: simple real roots.} The residue of $X(z)/z$ at a simple pole $p_i$ is
+\[
+  A_i=\Bigl[(z-p_i)\frac{X(z)}{z}\Bigr]_{z=p_i},\qquad
+  \frac{X(z)}{z}=\sum_{i=1}^{n}\frac{A_i}{z-p_i}.
+\]
+
+\begin{example}
+Obtain the inverse $z$ transform of $X(z)=\dfrac{z+1}{z^{2}+0.3z+0.02}$.
+
+\medskip\noindent\textbf{1.}\
+$\dfrac{X(z)}{z}=\dfrac{z+1}{z(z+0.1)(z+0.2)}=\dfrac{A}{z}+\dfrac{B}{z+0.1}+\dfrac{C}{z+0.2}$,
+\[
+  A=\Bigl[z\frac{X(z)}{z}\Bigr]_{z=0}=\frac{1}{0.1\cdot0.2}=50,\quad
+  B=\Bigl[(z+0.1)\frac{X(z)}{z}\Bigr]_{z=-0.1}=\frac{-0.1+1}{(-0.1)(-0.1+0.2)}=-90,
+\]
+\[
+  C=\Bigl[(z+0.2)\frac{X(z)}{z}\Bigr]_{z=-0.2}=\frac{z+1}{z(z+0.1)}\Big|_{z=-0.2}=40.
+\]
+\textbf{2.}\ $\dfrac{X(z)}{z}=\dfrac{50}{z}-\dfrac{90}{z+0.1}+\dfrac{40}{z+0.2}$, hence
+$X(z)=50-\dfrac{90z}{z+0.1}+\dfrac{40z}{z+0.2}$ and
+\[
+  x(k)=50\,\delta(k)-90(-0.1)^{k}+40(-0.2)^{k},\qquad k\ge0.
+\]
+\end{example}
+
+\paragraph{Case 2: complex conjugate and simple real roots.} Use the following transforms (the two
+denominators are identical and have the same complex-conjugate poles):
+\begin{align}
+  \ZT{\ee^{-ak}\sin(k\omega)}&=\frac{\ee^{-a}\sin(\omega)\,z}{z^{2}-2\ee^{-a}\cos(\omega)\,z+\ee^{-2a}},\\
+  \ZT{\ee^{-ak}\cos(k\omega)}&=\frac{z\,[z-\ee^{-a}\cos(\omega)]}{z^{2}-2\ee^{-a}\cos(\omega)\,z+\ee^{-2a}}.
+\end{align}
+The numerators can be scaled and combined to obtain the desired inverse $z$ transform.
+
+\begin{example}
+Find $x(k)$ for $X(z)=\dfrac{z^{3}+2z+1}{(z-0.1)(z^{2}+z+0.5)}$.
+
+\medskip\noindent\textbf{1.}\
+$\dfrac{X(z)}{z}=\dfrac{z^{3}+2z+1}{z(z-0.1)(z^{2}+z+0.5)}=\dfrac{A_1}{z}+\dfrac{A_2}{z-0.1}+\dfrac{Az+B}{z^{2}+z+0.5}$,
+\begin{align*}
+  A_1&=\Bigl[z\frac{X(z)}{z}\Bigr]_{z=0}=\frac{1}{(-0.1)(0.5)}=-20,\\
+  A_2&=\Bigl[(z-0.1)\frac{X(z)}{z}\Bigr]_{z=0.1}=\frac{z^{3}+2z+1}{z(z^{2}+z+0.5)}\Big|_{z=0.1}=19.689 .
+\end{align*}
+Equating coefficients in
+$z^{3}+2z+1=A_1(z-0.1)(z^{2}+z+0.5)+A_2z(z^{2}+z+0.5)+(Az+B)z(z-0.1)$:
+\[
+  z^{3}:\ 1=A_1+A_2+A\ \Rightarrow\ A=1.311,\qquad
+  z^{1}:\ 2=0.4A_1+0.5A_2-0.1B\ \Rightarrow\ B=-1.557,
+\]
+and the remaining coefficients serve as a check ($z^{0}$: $-0.05A_1=1$; $z^{2}$: $0.9A_1+A_2-0.1A+B\approx0$).
+
+\smallskip\noindent\textbf{2.}\
+$X(z)=-20+\dfrac{19.689\,z}{z-0.1}+\dfrac{1.311z^{2}-1.557z}{z^{2}+z+0.5}$. Match the last term to
+\[
+  \frac{1.311\,z\,[z-\ee^{-a}\cos\omega]-C\,\ee^{-a}\sin(\omega)\,z}{z^{2}-2\ee^{-a}\cos(\omega)z+\ee^{-2a}} .
+\]
+Then $\ee^{-2a}=0.5\Rightarrow\ee^{-a}=\sqrt{0.5}=0.707$; $-2\ee^{-a}\cos\omega=1\Rightarrow\cos\omega=-0.707$,
+$\omega=3\pi/4$, $\sin\omega=0.707$; and from the $z^{1}$ coefficient $-1.557=-1.311\,\ee^{-a}\cos\omega-C\,\ee^{-a}\sin\omega$
+gives $C=4.426$. Therefore
+\[
+  x(k)=-20\,\delta(k)+19.689(0.1)^{k}+1.311\,\ee^{-ak}\cos\!\bigl(\tfrac{3\pi}{4}k\bigr)-4.426\,\ee^{-ak}\sin\!\bigl(\tfrac{3\pi}{4}k\bigr),\quad k\ge0,
+\]
+\[
+  x(k)=-20\,\delta(k)+19.689(0.1)^{k}+(0.707)^{k}\Bigl[1.311\cos\!\bigl(\tfrac{3\pi k}{4}\bigr)-4.426\sin\!\bigl(\tfrac{3\pi k}{4}\bigr)\Bigr].
+\]
+\end{example}
+
+\paragraph{Case 3: repeated roots.}
+\[
+  X(z)=\frac{N(z)}{(z-z_1)^{r}\prod_{j=r+1}^{n}(z-z_j)}
+  =\underbrace{\sum_{i=1}^{r}\frac{A_{1i}}{(z-z_1)^{r+1-i}}}_{\text{repeated roots}}
+   +\underbrace{\sum_{j=r+1}^{n}\frac{A_j}{z-z_j}}_{\text{non-repeated roots}},
+\]
+\[
+  A_{1i}=\frac{1}{(i-1)!}\left.\frac{\dd^{\,i-1}}{\dd z^{\,i-1}}\Bigl[(z-z_1)^{r}X(z)\Bigr]\right|_{z=z_1},\qquad i=1,2,\dots,r.
+\]
+
+\begin{example}
+Obtain the inverse $z$ transform of $X(z)=\dfrac{1}{z^{2}(z-0.5)}$. Expand
+\[
+  \frac{X(z)}{z}=\frac{1}{z^{3}(z-0.5)}=\frac{A_{11}}{z^{3}}+\frac{A_{12}}{z^{2}}+\frac{A_{13}}{z}+\frac{A_4}{z-0.5}.
+\]
+\begin{align*}
+  A_{11}&=z^{3}\frac{X(z)}{z}\Big|_{z=0}=\frac{1}{z-0.5}\Big|_{0}=-2,\\
+  A_{12}&=\frac{1}{1!}\frac{\dd}{\dd z}\Bigl[\frac{1}{z-0.5}\Bigr]_{z=0}=-\frac{1}{(z-0.5)^{2}}\Big|_{0}=-4,\\
+  A_{13}&=\frac{1}{2!}\frac{\dd^{2}}{\dd z^{2}}\Bigl[\frac{1}{z-0.5}\Bigr]_{z=0}=\frac12\,\frac{2}{(z-0.5)^{3}}\Big|_{0}=\frac{1}{(z-0.5)^{3}}\Big|_{0}=-8,\\
+  A_{4}&=(z-0.5)\frac{X(z)}{z}\Big|_{z=0.5}=\frac{1}{z^{3}}\Big|_{0.5}=8.
+\end{align*}
+Therefore
+\[
+  X(z)=-\frac{2}{z^{2}}-\frac{4}{z}-8+\frac{8z}{z-0.5}=-2z^{-2}-4z^{-1}-8+\frac{8z}{z-0.5},
+\]
+\[
+  x(k)=-2\,\delta(k-2)-4\,\delta(k-1)-8\,\delta(k)+8(0.5)^{k},\qquad k\ge0.
+\]
+\end{example}
+
+\addedsection[Partial fractions: additional problems]
+\begin{problem}[Simple real roots]
+Find $x(k)$ for $X(z)=\dfrac{z}{(z-0.5)(z-0.8)}$ and check $x(2)$ by long division.
+\end{problem}
+\begin{solution}
+$\dfrac{X(z)}{z}=\dfrac{1}{(z-0.5)(z-0.8)}=\dfrac{A}{z-0.5}+\dfrac{B}{z-0.8}$ with
+$A=\dfrac{1}{0.5-0.8}=-\dfrac{10}{3}$ and $B=\dfrac{1}{0.8-0.5}=\dfrac{10}{3}$, so
+\[
+  x(k)=\tfrac{10}{3}\bigl[(0.8)^{k}-(0.5)^{k}\bigr].
+\]
+Check: $x(0)=0$, $x(1)=\tfrac{10}{3}(0.3)=1$, $x(2)=\tfrac{10}{3}(0.64-0.25)=1.3$. Long division gives
+$X(z)=z^{-1}+1.3z^{-2}+\cdots$, as expected.
+\end{solution}
+
+\begin{problem}[Complex-conjugate poles]
+Find $x(k)$ for $X(z)=\dfrac{z}{z^{2}-z+0.5}$.
+\end{problem}
+\begin{solution}
+The poles are $0.5\pm\jj0.5$, so $\ee^{-2a}=0.5$, $\ee^{-a}=0.7071$ and $\ee^{-a}\cos\omega=0.5$ gives
+$\omega=\pi/4$ with $\ee^{-a}\sin\omega=0.5$. Comparing with $\ZT{\ee^{-ak}\sin(k\omega)}=\dfrac{0.5\,z}{z^{2}-z+0.5}$,
+\[
+  X(z)=2\cdot\frac{0.5\,z}{z^{2}-z+0.5}\ \Rightarrow\ x(k)=2\,(0.7071)^{k}\sin\!\bigl(\tfrac{\pi k}{4}\bigr).
+\]
+Check: $x(1)=2(0.7071)(0.7071)=1$, $x(2)=2(0.5)(1)=1$, $x(3)=2(0.3536)(0.7071)=0.5$; long division of $X(z)$
+gives $z^{-1}+z^{-2}+0.5z^{-3}+\cdots$.
+\end{solution}
+
+\begin{problem}[Repeated roots]
+Find $x(k)$ for $X(z)=\dfrac{z}{(z-1)^{2}(z-0.5)}$.
+\end{problem}
+\begin{solution}
+$\dfrac{X(z)}{z}=\dfrac{1}{(z-1)^{2}(z-0.5)}=\dfrac{A_{11}}{(z-1)^{2}}+\dfrac{A_{12}}{z-1}+\dfrac{A_3}{z-0.5}$.
+$A_{11}=\dfrac{1}{z-0.5}\big|_{1}=2$, $A_{12}=\dfrac{\dd}{\dd z}\Bigl[\dfrac{1}{z-0.5}\Bigr]_{1}=-\dfrac{1}{0.25}=-4$,
+$A_3=\dfrac{1}{(0.5-1)^{2}}=4$. With table entries 5 ($Tz/(z-1)^2$ for $T=1$), 3 and 14,
+\[
+  x(k)=2k-4+4(0.5)^{k},\qquad k\ge0.
+\]
+Check: $x(0)=0$, $x(1)=2-4+2=0$, $x(2)=4-4+1=1$, $x(3)=6-4+0.5=2.5$.
+\end{solution}
+
+%==============================================================================
+\subsection{Difference equations}\scanref{pp.\,23--25}
+The LTI discrete-time difference equation can be written as
+\begin{multline*}
+  y(k+n)+a_{n-1}y(k+n-1)+\cdots+a_1y(k+1)+a_0y(k)\\
+  =b_nu(k+n)+b_{n-1}u(k+n-1)+\cdots+b_1u(k+1)+b_0u(k).
+\end{multline*}
+If the right-hand side is zero it is called \emph{homogeneous}. Here $u(k)$ is the system input and $y(k)$ the
+system output. The $z$ transform can be used to solve difference equations; the translation rules are collected
+in the following table.
+
+\begin{center}\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}ll@{}}\toprule
+Discrete-time function & $z$ transform \\ \midrule
+$x(k)$   & $X(z)$ \\
+$x(k+1)$ & $zX(z)-z\,x(0)$ \\
+$x(k+2)$ & $z^{2}X(z)-z^{2}x(0)-z\,x(1)$ \\
+$x(k+3)$ & $z^{3}X(z)-z^{3}x(0)-z^{2}x(1)-z\,x(2)$ \\
+$x(k-1)$ & $z^{-1}X(z)$ \\
+$x(k-2)$ & $z^{-2}X(z)$ \\ \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{boardnote}
+In the board table the last term of the $x(k+3)$ row is written $-z\,x(0)$. By the left-shift theorem it is
+$-z\,x(2)$, which is the form typeset above.
+\end{boardnote}
+
+\begin{example}
+Solve $y(k+2)+3y(k+1)+2y(k)=0$, $y(0)=0$, $y(1)=1$, with the $z$ transform.
+\begin{align*}
+  z^{2}Y(z)-z^{2}y(0)-z\,y(1)+3\bigl[zY(z)-z\,y(0)\bigr]+2Y(z)&=0\\
+  Y(z)\bigl[z^{2}+3z+2\bigr]=z\quad\Rightarrow\quad Y(z)&=\frac{z}{(z+1)(z+2)}.
+\end{align*}
+$\dfrac{Y(z)}{z}=\dfrac{1}{(z+1)(z+2)}=\dfrac{A_1}{z+1}+\dfrac{A_2}{z+2}$ with $A_1=1$, $A_2=-1$, so
+$Y(z)=\dfrac{z}{z+1}-\dfrac{z}{z+2}$ and
+\[
+  y(k)=(-1)^{k}-(-2)^{k},\qquad k\ge0.
+\]
+\end{example}
+
+\begin{example}
+Solve the LTI difference equation $y(k+2)-\tfrac32y(k+1)+\tfrac12y(k)=1(k)$ with $y(0)=1$, $y(1)=\tfrac52$.
+\begin{align*}
+  z^{2}Y-z^{2}y(0)-z\,y(1)-\tfrac32\bigl[zY-z\,y(0)\bigr]+\tfrac12Y&=\frac{z}{z-1}\\
+  z^{2}Y-z^{2}-\tfrac52z-\tfrac32zY+\tfrac32z+\tfrac12Y&=\frac{z}{z-1}\\
+  Y(z)\bigl[z^{2}-\tfrac32z+\tfrac12\bigr]&=\frac{z}{z-1}+z^{2}+z\\
+  \Rightarrow\quad Y(z)&=\frac{z^{3}}{(z-1)^{2}(z-0.5)}.
+\end{align*}
+\textbf{1.}\
+$\dfrac{Y(z)}{z}=\dfrac{z^{2}}{(z-1)^{2}(z-0.5)}=\dfrac{A_{11}}{(z-1)^{2}}+\dfrac{A_{12}}{z-1}+\dfrac{A_3}{z-0.5}$:
+\begin{align*}
+  A_{11}&=\frac{z^{2}}{z-0.5}\Big|_{z=1}=\frac{1}{0.5}=2,\\
+  A_{12}&=\frac{\dd}{\dd z}\Bigl[\frac{z^{2}}{z-0.5}\Bigr]_{z=1}=\frac{2z(z-0.5)-z^{2}}{(z-0.5)^{2}}\Big|_{z=1}=0,\\
+  A_3&=\frac{0.5^{2}}{(0.5-1)^{2}}=1.
+\end{align*}
+\textbf{2.}\ From the table (rows $2z/(z-1)^{2}$ and $z/(z-0.5)$)
+\[
+  Y(z)=\frac{2z}{(z-1)^{2}}+\frac{z}{z-0.5},\qquad y(k)=2k+(0.5)^{k},\quad k\ge0,
+\]
+which satisfies $y(0)=1$ and $y(1)=2.5$.
+\end{example}
+
+\begin{boardnote}
+In step 2 of this example the board writes the second term as $z/(z+0.5)$; the pole is at $+0.5$
+(from $A_3/(z-0.5)$), so the correct term is $z/(z-0.5)$, which is what is used above and which gives
+$y(k)=2k+(0.5)^{k}$ as on the board.
+\end{boardnote}
+
+\addedsection[Difference equations: additional problems]
+\begin{problem}[Homogeneous, complex poles]
+Solve $y(k+2)-y(k+1)+0.5\,y(k)=0$ with $y(0)=0$, $y(1)=1$.
+\end{problem}
+\begin{solution}
+$z^{2}Y-z\cdot1-\bigl[zY-0\bigr]+0.5Y=0\Rightarrow Y(z)=\dfrac{z}{z^{2}-z+0.5}$, the same function as in
+the complex-conjugate problem above, so $y(k)=2(0.7071)^{k}\sin(\pi k/4)$. The first values are $0,\,1,\,1,\,0.5,\,0,\,-0.25,\dots$;
+the recursion $y(k+2)=y(k+1)-0.5y(k)$ reproduces them.
+\end{solution}
+
+\begin{problem}[Step input, first order]
+Solve $y(k+1)-0.8\,y(k)=u(k)$, $y(0)=0$, $u(k)=1(k)$, and find $y(\infty)$.
+\end{problem}
+\begin{solution}
+$zY-0.8Y=\dfrac{z}{z-1}\Rightarrow Y=\dfrac{z}{(z-1)(z-0.8)}$, $\dfrac{Y}{z}=\dfrac{5}{z-1}-\dfrac{5}{z-0.8}$, hence
+$y(k)=5\bigl(1-0.8^{k}\bigr)$ and $y(\infty)=5$. Final-value theorem: $\lim_{z\to1}\dfrac{z-1}{z}Y=\dfrac{1}{0.2}=5$.
+\end{solution}

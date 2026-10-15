@@ -1,0 +1,31 @@
+% A/D converter errors (cf. handwritten page 4)
+\begin{tikzpicture}[font=\scriptsize]
+  \def\W{3.0}\def\H{2.6}
+  \foreach \k in {0,4.0,8.0} {
+    \begin{scope}[xshift=\k cm]
+      \draw[->] (0,0) -- (\W+0.3,0); \draw[->] (0,0) -- (0,\H+0.4) node[above]{BIN};
+      \node[left] at (0,0) {000}; \node[left] at (0,\H/2) {100}; \node[left] at (0,\H) {111};
+      \draw (\W/2,-0.05) -- (\W/2,0.05); \draw (\W,-0.05) -- (\W,0.05);
+      \node[below] at (\W/2,0) {$\tfrac12$FS}; \node[below] at (\W,0) {FS};
+      \draw[dashed,black!70] (0,0) -- (\W,\H);
+    \end{scope}
+  }
+  % panel 1: offset error
+  \draw[itublue,thick] (0.55,0) -- (\W,{\H*(\W-0.55)/\W});
+  \node[black!70,rotate=40] at (1.0,1.65) {ideal};
+  \node[itublue] at (2.15,1.45) {actual};
+  \draw[<-] (1.35,0.5) -- (1.9,0.2) node[right]{offset error};
+  % panel 2: linearity error
+  \begin{scope}[xshift=4.0cm]
+    \draw[itublue,thick,domain=0:\W,samples=40,smooth] plot (\x,{\H*(1-exp(-2.2*\x/\W))/(1-exp(-2.2))});
+    \node[itublue] at (1.1,2.35) {actual}; \node[black!70] at (2.5,1.55) {ideal};
+    \draw[<-] (1.3,1.35) -- (1.9,0.65) node[right]{linearity};
+    \node at (2.45,0.42) {error};
+  \end{scope}
+  % panel 3: gain error
+  \begin{scope}[xshift=8.0cm]
+    \draw[itublue,thick] (0,0) -- (\W*0.62,\H);
+    \node[itublue] at (0.75,2.5) {actual}; \node[black!70] at (2.4,1.35) {ideal};
+    \draw[<-] (1.45,1.45) -- (1.95,1.0) node[right]{gain error};
+  \end{scope}
+\end{tikzpicture}

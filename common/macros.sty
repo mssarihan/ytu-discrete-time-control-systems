@@ -1,0 +1,39 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{macros}[2026/10/04 personal notation]
+\RequirePackage{amsmath,amssymb,mathtools,bm,xcolor}
+
+% sets
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+
+% delimiters: \norm{x}, \abs{x}, \inner{x,y}, \set{...}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+\DeclarePairedDelimiter{\set}{\{}{\}}
+
+% operators
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\rank}{rank}
+
+% misc
+\newcommand{\transp}{^{\top}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ddt}[1]{\frac{\mathrm{d}#1}{\mathrm{d}t}}
+\newcommand{\st}{\;\text{s.t.}\;}
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\mat}[1]{\bm{#1}}
+
+% discrete-time control shortcuts
+\newcommand{\xk}{x_k}
+\newcommand{\uk}{u_k}
+\newcommand{\yk}{y_k}
+\newcommand{\xkp}{x_{k+1}}
+
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\endinput
